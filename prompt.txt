@@ -1,0 +1,17 @@
+saya ingin membuat sebuah chatbot wa dan website manajemen untuk humas kantor
+
+requirement yang diinginkan adalah : 
+# Chatbot WA 
+- chatbot difungsikan sebagai rule based saja, bukan yang generatif LLM
+- jadi, first reply chatbot akan menyapa pelanggan yang mengirim pesan ke nomor ini
+- first reply juga ada pilihan menu berupa button begitu sebagai rule basednya nanti, sebagai contoh button : Informasi, Administrasi, Pengaduan, dan Mengobrol dengan Petugas 
+- ada juga button atau rule yang bisa mengembalikan ke pilihan menu awal
+- intinya seperti ini, jadi first reply hanya berlaku 1x saja pada first chat di hari itu 
+- saat memilih menu Mengobrol dengan Petugas, maka chatbot akan mengirimkan pesan yang berisi formulir nama dan keperluan, setelah terisi maka akan langsung terkirim ke website manajemen sebagai reminder bahwa ada pelanggan yang ingin bertanya langsung kepada petugas tanpa melalui chatbot
+
+# Website Manajemen
+- website digunakan untuk manajemen data yang digunakan oleh chatbot, misalnya terkait informasi, administrasi, dsb.
+- website juga digunakan untuk manajemen piket pegawai, misal hari ini tugas piket pegawai siapa yang akan membalas pesan yang masuk ke chatbot
+- website juga digunakan untuk mencatat jumlah pelanggan harian yang masuk ke Chatbot
+
+disini saya ingin brainstorming terlebih dahulu, dengan requirement seperti ini, kira2 tech stack apa yang cocok dan memudahkan ?
