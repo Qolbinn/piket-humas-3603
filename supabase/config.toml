@@ -1,0 +1,20 @@
+-- Supabase CLI config (opsional, jika menggunakan local dev)
+-- Jalankan: npx supabase init (jika belum ada)
+
+[api]
+port = 54321
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+port = 54323
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000/**"]
+
+[auth.email]
+enable_signup = false
