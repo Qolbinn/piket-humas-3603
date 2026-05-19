@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { logoutAction } from "@/lib/actions/auth";
 import { 
   LayoutDashboard, 
   CalendarDays, 
@@ -55,12 +56,14 @@ export function DashboardSidebar() {
         </nav>
         
         <div className="mt-auto">
-          <Link href="/login">
-            <Button variant="outline" className="w-full justify-start gap-2 text-muted-foreground">
-              <LogOut className="h-4 w-4" />
-              Keluar
-            </Button>
-          </Link>
+          <Button 
+            variant="outline" 
+            className="w-full justify-start gap-2 text-muted-foreground"
+            onClick={async () => await logoutAction()}
+          >
+            <LogOut className="h-4 w-4" />
+            Keluar
+          </Button>
         </div>
       </div>
     </div>

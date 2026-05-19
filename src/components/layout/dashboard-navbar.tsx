@@ -2,6 +2,7 @@
 
 import { Bell, Menu, LayoutDashboard, CalendarDays, Users, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { logoutAction } from "@/lib/actions/auth";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -23,7 +24,13 @@ const mobileMenuItems = [
   { name: "Ekskalasi Pelanggan", href: "/pelanggan", icon: MessageSquare },
 ];
 
-export function DashboardNavbar() {
+interface DashboardNavbarProps {
+  userName: string;
+  userRole: string;
+  initials: string;
+}
+
+export function DashboardNavbar({ userName, userRole, initials }: DashboardNavbarProps) {
   const pathname = usePathname();
 
   return (
@@ -44,18 +51,18 @@ export function DashboardNavbar() {
               </div>
             </div>
             <nav className="grid gap-2 p-4 text-sm font-medium">
-               {mobileMenuItems.map((item) => {
-                 const isActive = pathname.startsWith(item.href);
-                 return (
-                   <Link key={item.name} href={item.href} className={cn(
-                     "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
-                     isActive ? "bg-muted text-primary" : "text-muted-foreground hover:bg-muted"
-                   )}>
-                     <item.icon className={cn("h-5 w-5", isActive ? "text-primary" : "")} />
-                     {item.name}
-                   </Link>
-                 );
-               })}
+              {mobileMenuItems.map((item) => {
+                const isActive = pathname.startsWith(item.href);
+                return (
+                  <Link key={item.name} href={item.href} className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
+                    isActive ? "bg-muted text-primary" : "text-muted-foreground hover:bg-muted"
+                  )}>
+                    <item.icon className={cn("h-5 w-5", isActive ? "text-primary" : "")} />
+                    {item.name}
+                  </Link>
+                );
+              })}
             </nav>
           </div>
         </SheetContent>
@@ -93,27 +100,33 @@ export function DashboardNavbar() {
             </Link>
           </DropdownMenuContent>
         </DropdownMenu>
-        
+
+        {/* Info User */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
               <Avatar className="h-9 w-9 border">
                 <AvatarImage src="" alt="Avatar" />
-                <AvatarFallback className="bg-primary/10 text-primary">JD</AvatarFallback>
+                <AvatarFallback className="bg-primary/10 text-primary font-medium">{initials}</AvatarFallback>
               </Avatar>
               <span className="sr-only">Toggle user menu</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel className="flex flex-col">
-              <span>John Doe</span>
-              <span className="text-xs text-muted-foreground font-normal">Petugas Humas</span>
+              <span>{userName}</span>
+              <span className="text-xs text-muted-foreground font-normal">{userRole}</span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Profil</DropdownMenuItem>
             <DropdownMenuItem>Pengaturan</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">Keluar</DropdownMenuItem>
+            <DropdownMenuItem 
+              className="text-destructive cursor-pointer"
+              onClick={async () => await logoutAction()}
+            >
+              Keluar
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

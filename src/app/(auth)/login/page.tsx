@@ -26,9 +26,15 @@ export default function LoginPage() {
 
   function onSubmit(data: { email: string; password: string }) {
     setErrorMsg(null)
+    
+    let finalEmail = data.email.trim()
+    if (!finalEmail.includes('@')) {
+      finalEmail = `${finalEmail}@bps.go.id`
+    }
+
     startTransition(async () => {
       const formData = new FormData()
-      formData.append('email', data.email)
+      formData.append('email', finalEmail)
       formData.append('password', data.password)
       const result = await loginAction(formData)
       if (result?.error) setErrorMsg(result.error)
@@ -57,7 +63,7 @@ export default function LoginPage() {
         <CardHeader className="space-y-1 pb-6">
           <CardTitle className="text-2xl font-bold tracking-tight">Login Petugas</CardTitle>
           <CardDescription className="text-base">
-            Masukkan email dan password untuk masuk ke dashboard.
+            Masukkan username (atau email) dan password untuk masuk ke dashboard.
           </CardDescription>
         </CardHeader>
 
@@ -71,11 +77,11 @@ export default function LoginPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="font-semibold">Alamat Email</Label>
+              <Label htmlFor="email" className="font-semibold">Username / Email</Label>
               <Input
                 id="email"
-                type="email"
-                placeholder="nama@bps.go.id"
+                type="text"
+                placeholder="nama (atau nama@bps.go.id)"
                 className="h-11 bg-muted/50 focus:bg-background transition-colors"
                 {...register('email', { required: true })}
                 disabled={isPending}
