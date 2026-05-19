@@ -27,6 +27,32 @@ export async function getJadwalByRange(startDate: string, endDate: string) {
   return data
 }
 
+// ---- GET MY SCHEDULE BY MONTH ----
+export async function getMySchedule(year: number, month: number) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) return []
+
+  const lastDay = new Date(year, month, 0).getDate()
+  const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+  const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
+
+  const { data, error } = await supabase
+    .from('jadwal_piket')
+    .select(`
+      *,
+      pegawai (id, name, gender)
+    `)
+    .eq('pegawai_id', user.id)
+    .gte('tanggal', startDate)
+    .lte('tanggal', endDate)
+    .order('tanggal', { ascending: true })
+
+  if (error) throw new Error(error.message)
+  return data
+}
+
 // ---- HELPER: Cek role admin ----
 async function requireAdmin() {
   const supabase = await createClient()

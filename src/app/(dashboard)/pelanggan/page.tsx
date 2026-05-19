@@ -31,6 +31,8 @@ const mockEskalasi = [
   }
 ];
 
+import { LayoutDashboard } from "lucide-react";
+
 export default function PelangganPage() {
   return (
     <div className="space-y-6">
@@ -38,8 +40,19 @@ export default function PelangganPage() {
         <h1 className="text-3xl font-bold tracking-tight">Ekskalasi Pelanggan</h1>
         <p className="text-muted-foreground">Daftar pelanggan yang diekskalasi dari interaksi chatbot WhatsApp.</p>
       </div>
-      
-      <div className="rounded-md border bg-card">
+
+      <div className="h-[400px] rounded-2xl border bg-card text-card-foreground shadow-sm flex flex-col items-center justify-center text-muted-foreground overflow-hidden relative">
+        <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02] bg-[size:20px_20px]"></div>
+        <div className="z-10 flex flex-col items-center gap-3">
+          <div className="p-4 bg-muted rounded-full">
+            <LayoutDashboard className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <p className="text-lg font-medium">Data Chat Pelanggan via WhatsApp</p>
+          <p className="text-sm text-muted-foreground max-w-sm text-center">Data akan diimplementasikan setelah connect ke chatbot WA. (Coming Soon)</p>
+        </div>
+      </div>
+
+      <div className="rounded-md border bg-card hidden">
         <Table>
           <TableHeader>
             <TableRow>
