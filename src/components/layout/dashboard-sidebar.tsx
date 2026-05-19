@@ -19,7 +19,7 @@ const menuItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Jadwal Piket", href: "/piket", icon: CalendarDays },
   { name: "Data Pegawai", href: "/pegawai", icon: Users },
-  { name: "Data Pelanggan", href: "/pelanggan", icon: MessageSquare },
+  { name: "Ekskalasi Pelanggan", href: "/pelanggan", icon: MessageSquare },
   { name: "Profil Saya", href: "/profile", icon: UserCircle },
 ];
 

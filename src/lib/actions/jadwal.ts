@@ -9,13 +9,9 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { TemplateDetail, JadwalPiket } from '@/lib/types/database'
 
-// ---- GET JADWAL BY MONTH ----
-export async function getJadwalByMonth(year: number, month: number) {
+// ---- GET JADWAL BY RANGE ----
+export async function getJadwalByRange(startDate: string, endDate: string) {
   const supabase = await createClient()
-
-  // Bulan di JS 0-indexed, tapi di PostgreSQL 1-indexed
-  const startDate = `${year}-${String(month).padStart(2, '0')}-01`
-  const endDate = new Date(year, month, 0).toISOString().split('T')[0] // last day
 
   const { data, error } = await supabase
     .from('jadwal_piket')
@@ -97,10 +93,21 @@ export async function assignJadwal(
     return { success: false, message: 'Tidak ada jadwal yang dihasilkan untuk rentang tanggal ini (mungkin hanya akhir pekan).' }
   }
 
-  // 3. Insert ke database (bulk)
+  // 3. Hapus jadwal lama pada tanggal-tanggal yang akan diisi oleh template ini
+  const uniqueDatesToReplace = Array.from(new Set(rows.map(r => r.tanggal)))
+  if (uniqueDatesToReplace.length > 0) {
+    const { error: deleteError } = await supabase
+      .from('jadwal_piket')
+      .delete()
+      .in('tanggal', uniqueDatesToReplace)
+      
+    if (deleteError) throw new Error(deleteError.message)
+  }
+
+  // 4. Insert ke database (bulk)
   const { error } = await supabase
     .from('jadwal_piket')
-    .upsert(rows, { onConflict: 'tanggal,pegawai_id', ignoreDuplicates: true })
+    .insert(rows)
 
   if (error) throw new Error(error.message)
 

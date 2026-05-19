@@ -22,7 +22,24 @@ DECLARE
     '33333333-3333-3333-3333-333333333333', -- langit.biru
     '44444444-4444-4444-4444-444444444444', -- kaylaazka
     '55555555-5555-5555-5555-555555555555', -- mira.merta
-    '66666666-6666-6666-6666-666666666666'  -- nurmala.afriyana
+    '66666666-6666-6666-6666-666666666666', -- nurmala.afriyana
+    '00000001-0000-0000-0000-000000000001', -- hmaulana
+    '00000002-0000-0000-0000-000000000002', -- asolihin
+    '00000003-0000-0000-0000-000000000003', -- yosep.bangun
+    '00000004-0000-0000-0000-000000000004', -- rohmad
+    '00000005-0000-0000-0000-000000000005', -- hendrop
+    '00000006-0000-0000-0000-000000000006', -- muharani
+    '00000007-0000-0000-0000-000000000007', -- ynurulita
+    '00000008-0000-0000-0000-000000000008', -- nuraisyah
+    '00000009-0000-0000-0000-000000000009', -- yenis
+    '00000010-0000-0000-0000-000000000010', -- robiatul
+    '00000011-0000-0000-0000-000000000011', -- bambang
+    '00000012-0000-0000-0000-000000000012', -- estianarusmawati
+    '00000013-0000-0000-0000-000000000013', -- elokdts
+    '00000014-0000-0000-0000-000000000014', -- noti
+    '00000015-0000-0000-0000-000000000015', -- msy.nourma
+    '00000016-0000-0000-0000-000000000016', -- dewipuspita
+    '00000017-0000-0000-0000-000000000017'  -- desnacita.harly
   ];
   emails TEXT[] := ARRAY[
     'humasbps3603@gmail.com',
@@ -30,18 +47,52 @@ DECLARE
     'langit.biru@bps.go.id',
     'kaylaazka@bps.go.id',
     'mira.merta@bps.go.id',
-    'nurmala.afriyana@bps.go.id'
+    'nurmala.afriyana@bps.go.id',
+    'hmaulana@bps.go.id',
+    'asolihin@bps.go.id',
+    'yosep.bangun@bps.go.id',
+    'rohmad@bps.go.id',
+    'hendrop@bps.go.id',
+    'muharani@bps.go.id',
+    'ynurulita@bps.go.id',
+    'nuraisyah@bps.go.id',
+    'yenis@bps.go.id',
+    'robiatul@bps.go.id',
+    'bambang@bps.go.id',
+    'estianarusmawati@bps.go.id',
+    'elokdts@bps.go.id',
+    'noti@bps.go.id',
+    'msy.nourma@bps.go.id',
+    'dewipuspita@bps.go.id',
+    'desnacita.harly@bps.go.id'
   ];
-  usernames TEXT[] := ARRAY[
+  passwords TEXT[] := ARRAY[
     'humasbps3603',
     'arzudaqolbin',
     'langit.biru',
     'kaylaazka',
     'mira.merta',
-    'nurmala.afriyana'
+    'nurmala.afriyana',
+    'hmaulana',
+    'asolihin',
+    'yosep.Bangun',
+    'rohmad',
+    'hendrop',
+    'muharani',
+    'ynurulita',
+    'nuraisyah',
+    'yenis',
+    'robiatul',
+    'bambang',
+    'estianarusmawati',
+    'elokdts',
+    'noti',
+    'msy.nourma',
+    'dewipuspita',
+    'desnacita.harly'
   ];
 BEGIN
-  FOR i IN 1..6 LOOP
+  FOR i IN 1..23 LOOP
     -- Insert into auth.users if not exists
     INSERT INTO auth.users (
       instance_id, id, aud, role, email, encrypted_password, 
@@ -51,7 +102,7 @@ BEGIN
     )
     SELECT 
       '00000000-0000-0000-0000-000000000000', user_ids[i], 'authenticated', 'authenticated', emails[i], 
-      crypt(usernames[i], gen_salt('bf')), 
+      crypt(passwords[i], gen_salt('bf')), 
       current_timestamp, current_timestamp, current_timestamp, 
       '{"provider":"email","providers":["email"]}', '{}', 
       current_timestamp, current_timestamp, '', '', '', ''
@@ -73,12 +124,29 @@ END $$;
 -- ============================================================
 
 INSERT INTO public.pegawai (id, name, username, email, phone, gender, role) VALUES
-  ('11111111-1111-1111-1111-111111111111', 'humasbps3603',     'humasbps3603',     'humasbps3603@gmail.com',     NULL, 'P', 'admin'),
-  ('22222222-2222-2222-2222-222222222222', 'arzudaqolbin',     'arzudaqolbin',     'arzudaqolbin@bps.go.id',     NULL, 'L', 'petugas'),
-  ('33333333-3333-3333-3333-333333333333', 'langit.biru',      'langit.biru',      'langit.biru@bps.go.id',      NULL, 'P', 'petugas'),
-  ('44444444-4444-4444-4444-444444444444', 'kaylaazka',        'kaylaazka',        'kaylaazka@bps.go.id',        NULL, 'P', 'petugas'),
-  ('55555555-5555-5555-5555-555555555555', 'mira.merta',       'mira.merta',       'mira.merta@bps.go.id',       NULL, 'P', 'petugas'),
-  ('66666666-6666-6666-6666-666666666666', 'nurmala.afriyana', 'nurmala.afriyana', 'nurmala.afriyana@bps.go.id', NULL, 'P', 'petugas')
+  ('11111111-1111-1111-1111-111111111111', 'humasbps3603',             'humasbps3603',     'humasbps3603@gmail.com',     NULL, 'P', 'admin'),
+  ('22222222-2222-2222-2222-222222222222', 'Arzuda Qolbin',             'arzudaqolbin',     'arzudaqolbin@bps.go.id',     NULL, 'L', 'petugas'),
+  ('33333333-3333-3333-3333-333333333333', 'Pelangi Langit Biru',              'langit.biru',      'langit.biru@bps.go.id',      NULL, 'P', 'petugas'),
+  ('44444444-4444-4444-4444-444444444444', 'Kayla Azka',                'kaylaazka',        'kaylaazka@bps.go.id',        NULL, 'P', 'petugas'),
+  ('55555555-5555-5555-5555-555555555555', 'Mira Merta',               'mira.merta',       'mira.merta@bps.go.id',       NULL, 'P', 'petugas'),
+  ('66666666-6666-6666-6666-666666666666', 'Nurmala Afriyana',         'nurmala.afriyana', 'nurmala.afriyana@bps.go.id', NULL, 'P', 'petugas'),
+  ('00000001-0000-0000-0000-000000000001', 'Husin Maulana',            'hmaulana',         'hmaulana@bps.go.id',         NULL, 'L', 'petugas'),
+  ('00000002-0000-0000-0000-000000000002', 'Achmad Solihin',           'asolihin',         'asolihin@bps.go.id',         NULL, 'L', 'petugas'),
+  ('00000003-0000-0000-0000-000000000003', 'Yosep Bangun',             'yosep.bangun',     'yosep.bangun@bps.go.id',     NULL, 'L', 'petugas'),
+  ('00000004-0000-0000-0000-000000000004', 'Rohmad Chamdani',          'rohmad',           'rohmad@bps.go.id',           NULL, 'L', 'petugas'),
+  ('00000005-0000-0000-0000-000000000005', 'Hendro Prayitno',          'hendrop',          'hendrop@bps.go.id',          NULL, 'L', 'petugas'),
+  ('00000006-0000-0000-0000-000000000006', 'Sari Muharani',            'muharani',         'muharani@bps.go.id',         NULL, 'P', 'petugas'),
+  ('00000007-0000-0000-0000-000000000007', 'Yuyun Nurulita',           'ynurulita',        'ynurulita@bps.go.id',        NULL, 'P', 'petugas'),
+  ('00000008-0000-0000-0000-000000000008', 'Nuraisyah',                'nuraisyah',        'nuraisyah@bps.go.id',        NULL, 'P', 'petugas'),
+  ('00000009-0000-0000-0000-000000000009', 'Yeni Susniyawati',         'yenis',            'yenis@bps.go.id',            NULL, 'P', 'petugas'),
+  ('00000010-0000-0000-0000-000000000010', 'Robiatul Adawiyah',        'robiatul',         'robiatul@bps.go.id',         NULL, 'P', 'petugas'),
+  ('00000011-0000-0000-0000-000000000011', 'Bambang Susilo Handoyono', 'bambang',          'bambang@bps.go.id',          NULL, 'L', 'petugas'),
+  ('00000012-0000-0000-0000-000000000012', 'Estiana Rusmawati',        'estianarusmawati', 'estianarusmawati@bps.go.id', NULL, 'P', 'petugas'),
+  ('00000013-0000-0000-0000-000000000013', 'Elok Dewi TS',             'elokdts',          'elokdts@bps.go.id',          NULL, 'P', 'petugas'),
+  ('00000014-0000-0000-0000-000000000014', 'Noti Lansaroni',           'noti',             'noti@bps.go.id',             NULL, 'P', 'petugas'),
+  ('00000015-0000-0000-0000-000000000015', 'Msy Nourma',               'msy.nourma',       'msy.nourma@bps.go.id',       NULL, 'P', 'petugas'),
+  ('00000016-0000-0000-0000-000000000016', 'Dewi Puspita Sari',        'dewipuspita',      'dewipuspita@bps.go.id',      NULL, 'P', 'petugas'),
+  ('00000017-0000-0000-0000-000000000017', 'Desnacita Harly Putri',    'desnacita.harly',  'desnacita.harly@bps.go.id',  NULL, 'P', 'petugas')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
@@ -86,8 +154,8 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 
 INSERT INTO public.template (id, name) VALUES
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Template Tim Alpha (Utama)'),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Template Tim Beta (Cadangan)')
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Team Minggu 1 & 3'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Team Minggu 2 & 4')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
@@ -96,126 +164,50 @@ ON CONFLICT (id) DO NOTHING;
 -- Max 3 pegawai per hari per template
 -- ============================================================
 
--- Tim Alpha (Utama)
+-- Team Minggu 1 & 3
 INSERT INTO public.template_detail (template_id, day_of_week, pegawai_id) VALUES
-  -- Senin (arzudaqolbin, langit.biru)
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 1, '22222222-2222-2222-2222-222222222222'),
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 1, '33333333-3333-3333-3333-333333333333'),
-  -- Selasa (kaylaazka, mira.merta)
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 2, '44444444-4444-4444-4444-444444444444'),
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 2, '55555555-5555-5555-5555-555555555555'),
-  -- Rabu (nurmala.afriyana, arzudaqolbin)
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 3, '66666666-6666-6666-6666-666666666666'),
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 3, '22222222-2222-2222-2222-222222222222'),
-  -- Kamis (langit.biru, kaylaazka)
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 4, '33333333-3333-3333-3333-333333333333'),
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 4, '44444444-4444-4444-4444-444444444444'),
-  -- Jumat (mira.merta, nurmala.afriyana)
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 5, '55555555-5555-5555-5555-555555555555'),
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 5, '66666666-6666-6666-6666-666666666666')
+  -- Senin (yosep, robiatul, rohmad chamdani)
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 1, '00000003-0000-0000-0000-000000000003'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 1, '00000010-0000-0000-0000-000000000010'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 1, '00000004-0000-0000-0000-000000000004'),
+  -- Selasa (qolbin, estiana, bambang)
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 2, '22222222-2222-2222-2222-222222222222'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 2, '00000012-0000-0000-0000-000000000012'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 2, '00000011-0000-0000-0000-000000000011'),
+  -- Rabu (kayla, elok, hendro)
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 3, '44444444-4444-4444-4444-444444444444'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 3, '00000013-0000-0000-0000-000000000013'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 3, '00000005-0000-0000-0000-000000000005'),
+  -- Kamis (mira, dewi, msy nourma)
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 4, '55555555-5555-5555-5555-555555555555'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 4, '00000016-0000-0000-0000-000000000016'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 4, '00000015-0000-0000-0000-000000000015'),
+  -- Jumat (nurmala, yenis, noti)
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 5, '66666666-6666-6666-6666-666666666666'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 5, '00000009-0000-0000-0000-000000000009'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 5, '00000014-0000-0000-0000-000000000014')
 ON CONFLICT DO NOTHING;
 
--- Tim Beta (Cadangan)
+-- Team Minggu 2 & 4
 INSERT INTO public.template_detail (template_id, day_of_week, pegawai_id) VALUES
-  -- Senin (kaylaazka, mira.merta)
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 1, '44444444-4444-4444-4444-444444444444'),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 1, '55555555-5555-5555-5555-555555555555'),
-  -- Selasa (nurmala.afriyana, arzudaqolbin)
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 2, '66666666-6666-6666-6666-666666666666'),
+  -- Senin (yosep, robiatul, solihin)
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 1, '00000003-0000-0000-0000-000000000003'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 1, '00000010-0000-0000-0000-000000000010'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 1, '00000002-0000-0000-0000-000000000002'),
+  -- Selasa (qolbin, estiana, nuraisyah)
   ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 2, '22222222-2222-2222-2222-222222222222'),
-  -- Rabu (langit.biru, kaylaazka)
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 3, '33333333-3333-3333-3333-333333333333'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 2, '00000012-0000-0000-0000-000000000012'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 2, '00000008-0000-0000-0000-000000000008'),
+  -- Rabu (kayla, elok, sari)
   ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 3, '44444444-4444-4444-4444-444444444444'),
-  -- Kamis (mira.merta, nurmala.afriyana)
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 3, '00000013-0000-0000-0000-000000000013'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 3, '00000006-0000-0000-0000-000000000006'),
+  -- Kamis (mira, dewi, desnacita)
   ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 4, '55555555-5555-5555-5555-555555555555'),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 4, '66666666-6666-6666-6666-666666666666'),
-  -- Jumat (arzudaqolbin, langit.biru)
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 5, '22222222-2222-2222-2222-222222222222'),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 5, '33333333-3333-3333-3333-333333333333')
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 4, '00000016-0000-0000-0000-000000000016'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 4, '00000017-0000-0000-0000-000000000017'),
+  -- Jumat (nurmala, yenis, yuyun)
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 5, '66666666-6666-6666-6666-666666666666'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 5, '00000009-0000-0000-0000-000000000009'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 5, '00000007-0000-0000-0000-000000000007')
 ON CONFLICT DO NOTHING;
-
--- ============================================================
--- SECTION 6: ESKALASI
--- Sample data dengan berbagai status
--- ============================================================
-
--- INSERT INTO public.eskalasi (nomor_pelanggan, nama_pelanggan, keperluan, detail, pegawai_id, status, waktu_respons, created_at, handled_at) VALUES
---   (
---     '6281234567890',
---     'Ahmad Fauzi',
---     'Pengaduan Layanan',
---     'Saya ingin melaporkan bahwa data sensus yang dikirimkan ke alamat saya tidak sesuai dengan kondisi keluarga saya saat ini.',
---     '33333333-3333-3333-3333-333333333333',
---     'handled',
---     12,
---     now() - INTERVAL '3 hours',
---     now() - INTERVAL '2 hours 48 minutes'
---   ),
---   (
---     '6289876543210',
---     'Rina Marlina',
---     'Permintaan Informasi',
---     'Ingin mengetahui jadwal pelaksanaan survei pendapatan rumah tangga di wilayah saya.',
---     '22222222-2222-2222-2222-222222222222',
---     'closed',
---     8,
---     now() - INTERVAL '1 day',
---     now() - INTERVAL '23 hours 52 minutes'
---   ),
---   (
---     '6285551234567',
---     'Doni Setiawan',
---     'Administrasi',
---     'Memerlukan bantuan terkait pengisian kuesioner yang belum saya pahami formatnya.',
---     NULL,
---     'waiting',
---     NULL,
---     now() - INTERVAL '30 minutes',
---     NULL
---   ),
---   (
---     '6287771234567',
---     'Fitri Handayani',
---     'Pengaduan Layanan',
---     'Petugas yang datang ke rumah saya tidak memberikan tanda bukti kunjungan.',
---     NULL,
---     'waiting',
---     NULL,
---     now() - INTERVAL '15 minutes',
---     NULL
---   ),
---   (
---     '6282223456789',
---     'Hendra Kusuma',
---     'Permintaan Informasi',
---     'Ingin mendapatkan data statistik kependudukan Kabupaten Tangerang tahun 2024.',
---     '44444444-4444-4444-4444-444444444444',
---     'handled',
---     25,
---     now() - INTERVAL '5 hours',
---     now() - INTERVAL '4 hours 35 minutes'
---   )
--- ON CONFLICT DO NOTHING;
-
--- ============================================================
--- SECTION 7: RIWAYAT PELANGGAN
--- Sample 15 kontak masuk selama seminggu terakhir
--- ============================================================
-
--- INSERT INTO public.riwayat_pelanggan (nomor_hp, created_at) VALUES
---   ('6281234567890', now() - INTERVAL '0 hours'),
---   ('6289876543210', now() - INTERVAL '1 hour'),
---   ('6285551234567', now() - INTERVAL '2 hours'),
---   ('6287771234567', now() - INTERVAL '3 hours'),
---   ('6282223456789', now() - INTERVAL '4 hours'),
---   ('6281111222333', now() - INTERVAL '5 hours'),
---   ('6283334445556', now() - INTERVAL '1 day'),
---   ('6284445556667', now() - INTERVAL '1 day 2 hours'),
---   ('6281234567890', now() - INTERVAL '1 day 4 hours'), -- pelanggan yg sama, kontak ulang
---   ('6286667778889', now() - INTERVAL '2 days'),
---   ('6287778889990', now() - INTERVAL '2 days 1 hour'),
---   ('6288889990001', now() - INTERVAL '3 days'),
---   ('6289990001112', now() - INTERVAL '4 days'),
---   ('6281230001234', now() - INTERVAL '5 days'),
---   ('6282340001235', now() - INTERVAL '6 days')
--- ON CONFLICT DO NOTHING;

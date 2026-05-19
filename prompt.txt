@@ -15,3 +15,53 @@ requirement yang diinginkan adalah :
 - website juga digunakan untuk mencatat jumlah pelanggan harian yang masuk ke Chatbot
 
 disini saya ingin brainstorming terlebih dahulu, dengan requirement seperti ini, kira2 tech stack apa yang cocok dan memudahkan ?
+
+
+
+pada tombol notifikasi di header dashboard, buatkan tampilan pop up drop down berisi notifikasi terkait masuknya ekskalasi pelanggan dari sevice chatbot wa nya
+
+notifikasi berisi nomor pelanggan, hari tanggal dan jam menit masuknya ekskalasi tersebut jika dipencet akan mengarah pada menu Data Pelanggan (yang ada di sidebar kiri)
+
+Ubah saja menu Data Pelanggan menjadi "Ekskalasi Pelanggan"
+
+dalam halaman Data Pelanggan, ditambahkan tabel yang berisi data-data ekskalasi pelanggan, tabelnya berisi kolom berikut : 
+1. Nomor Pelanggan
+2. Nama Pelanggan
+3. Keperluan
+4. Hari Tanggal & Jam Menit masuknya Ekskalasi
+
+
+Nama, email, password
+
+Husin Maulana, hmaulana@bps.go.id, hmaulana
+Achmad Solihin, asolihin@bps.go.id, asolihin
+Yosep Bangun, yosep.bangun@bps.go.id, yosep.Bangun
+Rohmad Chamdani, rohmad@bps.go.id, rohmad
+Hendro Prayitno, hendrop@bps.go.id, hendrop
+Sari Muharani, muharani@bps.go.id, muharani
+Yuyun Nurulita, ynurulita@bps.go.id, ynurulita
+Nuraisyah, nuraisyah@bps.go.id, nuraisyah
+Yeni Susniyawati, yenis@bps.go.id, yenis
+Robiatul Adawiyah, robiatul@bps.go.id, robiatul
+Bambang Susilo Handoyono, bambang@bps.go.id, bambang
+Estiana Rusmawati, estianarusmawati@bps.go.id, estianarusmawati
+Elok Dewi TS, elokdts@bps.go.id, elokdts
+Noti Lansaroni, noti@bps.go.id, noti
+Msy Nourma, msy.nourma@bps.go.id, msy.nourma
+Dewi Puspita Sari, dewipuspita@bps.go.id, dewipuspita
+Desnacita Harly Putri, desnacita.harly@bps.go.id, desnacita.harly
+
+
+Team Minggu 1 & 3
+Senin = yosep, robiatul, rohmad chamdani
+Selasa = qolbin, estiana, bambang   
+Rabu = kayla, elok, hendro  
+Kamis = mira, dewi, msy nourma
+Jumat = nurmala, yenis, noti
+
+Team Minggu 2 & 4
+Senin = yosep, robiatul, solihin
+Selasa = qolbin, estiana, nuraisyah   
+Rabu = kayla, elok, sari
+Kamis = mira, dewi, desnacita
+Jumat = nurmala, yenis, yuyun

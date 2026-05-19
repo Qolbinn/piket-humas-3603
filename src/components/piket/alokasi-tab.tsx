@@ -26,9 +26,11 @@ interface AlokasiTabProps {
 export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const currentYear = new Date().getFullYear();
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
-  const [selectedMonthOffset, setSelectedMonthOffset] = useState<string>("0");
+  const [selectedYear, setSelectedYear] = useState<string>(String(currentYear));
+  const [selectedMonth, setSelectedMonth] = useState<string>(String(new Date().getMonth() + 1));
   const [selectedWeeks, setSelectedWeeks] = useState<{start: string, end: string}[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   
@@ -42,8 +44,7 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
   const activeTemplateForAssign = templates.find(t => t.id === selectedTemplateId);
 
   // Assignment Logic
-  const baseDate = new Date();
-  const targetDate = addMonths(baseDate, parseInt(selectedMonthOffset));
+  const targetDate = new Date(parseInt(selectedYear), parseInt(selectedMonth) - 1, 1);
   const monthStart = startOfMonth(targetDate);
   const monthEnd = endOfMonth(monthStart);
 
@@ -66,8 +67,8 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
     return {
       id: `w-${idx}`,
       label: `Minggu ke-${idx + 1}`,
-      start: format(wStart, "yyyy-MM-dd"),
-      end: format(friday, "yyyy-MM-dd"),
+      start: format(displayStart, "yyyy-MM-dd"),
+      end: format(displayEnd, "yyyy-MM-dd"),
       displayRange: `${format(displayStart, "d MMM", { locale: id })} - ${format(displayEnd, "d MMM yyyy", { locale: id })}`,
       isValid: displayStart <= monthEnd && displayEnd >= monthStart
     };
@@ -89,9 +90,20 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
     }
   };
 
+  const handleYearChange = (year: string) => {
+    setSelectedYear(year);
+    setSelectedWeeks([]);
+  };
+
+  const handleMonthChange = (month: string) => {
+    setSelectedMonth(month);
+    setSelectedWeeks([]);
+  };
+
   const openAssignDialog = (templateId: string) => {
     setSelectedTemplateId(templateId);
-    setSelectedMonthOffset("0");
+    setSelectedYear(String(new Date().getFullYear()));
+    setSelectedMonth(String(new Date().getMonth() + 1));
     setSelectedWeeks([]);
     setAssignDialogOpen(true);
   };
@@ -251,18 +263,42 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
           </DialogHeader>
 
           <div className="space-y-6 py-4">
-            <div className="space-y-3">
-              <Label>Bulan Target</Label>
-              <Select value={selectedMonthOffset} onValueChange={(v) => { setSelectedMonthOffset(v); setSelectedWeeks([]); }}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0">{format(baseDate, "MMMM yyyy", { locale: id })} (Bulan Ini)</SelectItem>
-                  <SelectItem value="1">{format(addMonths(baseDate, 1), "MMMM yyyy", { locale: id })}</SelectItem>
-                  <SelectItem value="2">{format(addMonths(baseDate, 2), "MMMM yyyy", { locale: id })}</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <Label>Tahun Target</Label>
+                <Select value={selectedYear} onValueChange={handleYearChange}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={String(currentYear)}>{currentYear}</SelectItem>
+                    <SelectItem value={String(currentYear + 1)}>{currentYear + 1}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-3">
+                <Label>Bulan Target</Label>
+                <Select value={selectedMonth} onValueChange={handleMonthChange}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Januari</SelectItem>
+                    <SelectItem value="2">Februari</SelectItem>
+                    <SelectItem value="3">Maret</SelectItem>
+                    <SelectItem value="4">April</SelectItem>
+                    <SelectItem value="5">Mei</SelectItem>
+                    <SelectItem value="6">Juni</SelectItem>
+                    <SelectItem value="7">Juli</SelectItem>
+                    <SelectItem value="8">Agustus</SelectItem>
+                    <SelectItem value="9">September</SelectItem>
+                    <SelectItem value="10">Oktober</SelectItem>
+                    <SelectItem value="11">November</SelectItem>
+                    <SelectItem value="12">Desember</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="space-y-3">

@@ -6,7 +6,7 @@ import { id } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { getJadwalByMonth } from "@/lib/actions/jadwal";
+import { getJadwalByRange } from "@/lib/actions/jadwal";
 
 interface JadwalTabProps {
   initialData: any[];
@@ -19,12 +19,26 @@ export function JadwalTab({ initialData }: JadwalTabProps) {
   
   const goToToday = () => setCurrentDate(new Date());
 
+  const monthStart = startOfMonth(currentDate);
+  const monthEnd = endOfMonth(monthStart);
+  
+  const startDay = monthStart.getDay();
+  const adjustedStart = new Date(monthStart);
+  adjustedStart.setDate(monthStart.getDate() - (startDay === 0 ? 6 : startDay - 1));
+
+  const endDay = monthEnd.getDay();
+  const adjustedEnd = new Date(monthEnd);
+  adjustedEnd.setDate(monthEnd.getDate() + (endDay === 0 ? 0 : 7 - endDay));
+
   // Fetch data when month changes
   useEffect(() => {
     const fetchNewJadwal = async () => {
       setIsLoading(true);
       try {
-        const data = await getJadwalByMonth(currentDate.getFullYear(), currentDate.getMonth() + 1);
+        const data = await getJadwalByRange(
+          format(adjustedStart, "yyyy-MM-dd"),
+          format(adjustedEnd, "yyyy-MM-dd")
+        );
         setJadwal(data);
       } catch (err) {
         console.error(err);
@@ -50,17 +64,6 @@ export function JadwalTab({ initialData }: JadwalTabProps) {
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
   
-  const monthStart = startOfMonth(currentDate);
-  const monthEnd = endOfMonth(monthStart);
-  
-  const startDay = monthStart.getDay();
-  const adjustedStart = new Date(monthStart);
-  adjustedStart.setDate(monthStart.getDate() - (startDay === 0 ? 6 : startDay - 1));
-
-  const endDay = monthEnd.getDay();
-  const adjustedEnd = new Date(monthEnd);
-  adjustedEnd.setDate(monthEnd.getDate() + (endDay === 0 ? 0 : 7 - endDay));
-
   const monthDays = eachDayOfInterval({ start: adjustedStart, end: adjustedEnd });
 
   // --- MOBILE LOGIC (WEEK) ---

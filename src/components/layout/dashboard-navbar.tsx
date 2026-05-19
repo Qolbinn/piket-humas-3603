@@ -20,7 +20,7 @@ const mobileMenuItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Jadwal Piket", href: "/piket", icon: CalendarDays },
   { name: "Data Pegawai", href: "/pegawai", icon: Users },
-  { name: "Data Pelanggan", href: "/pelanggan", icon: MessageSquare },
+  { name: "Ekskalasi Pelanggan", href: "/pelanggan", icon: MessageSquare },
 ];
 
 export function DashboardNavbar() {
@@ -62,11 +62,37 @@ export function DashboardNavbar() {
       </Sheet>
 
       <div className="flex w-full items-center justify-end gap-4">
-        <Button variant="outline" size="icon" className="relative h-9 w-9 rounded-full">
-          <Bell className="h-4 w-4" />
-          <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-secondary" />
-          <span className="sr-only">Toggle notifications</span>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon" className="relative h-9 w-9 rounded-full">
+              <Bell className="h-4 w-4" />
+              <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-secondary" />
+              <span className="sr-only">Toggle notifications</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-80">
+            <DropdownMenuLabel>Notifikasi Ekskalasi Baru</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild className="p-3 cursor-pointer items-start flex-col gap-1">
+              <Link href="/pelanggan">
+                <div className="font-semibold text-sm">Nomor: +62 812-3456-7890</div>
+                <div className="text-xs text-muted-foreground">Senin, 12 Mei - 14:30 WIB</div>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="p-3 cursor-pointer items-start flex-col gap-1">
+              <Link href="/pelanggan">
+                <div className="font-semibold text-sm">Nomor: +62 856-7890-1234</div>
+                <div className="text-xs text-muted-foreground">Senin, 12 Mei - 15:45 WIB</div>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <Link href="/pelanggan">
+              <Button variant="ghost" className="w-full text-xs text-center text-primary h-8">
+                Lihat Semua Ekskalasi
+              </Button>
+            </Link>
+          </DropdownMenuContent>
+        </DropdownMenu>
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
