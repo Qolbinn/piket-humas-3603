@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS public.pegawai (
   name       TEXT NOT NULL,
   username   TEXT NOT NULL UNIQUE,
   email      TEXT NOT NULL UNIQUE,
+  phone      TEXT UNIQUE,
   gender     TEXT NOT NULL CHECK (gender IN ('L', 'P')),
   role       TEXT NOT NULL DEFAULT 'petugas' CHECK (role IN ('admin', 'petugas')),
   avatar_url TEXT,

@@ -7,6 +7,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import type { TemplateDetail, JadwalPiket } from '@/lib/types/database'
 
 // ---- GET JADWAL BY MONTH ----
 export async function getJadwalByMonth(year: number, month: number) {
@@ -30,63 +31,80 @@ export async function getJadwalByMonth(year: number, month: number) {
   return data
 }
 
-// ---- GET ALL TEMPLATES ----
-export async function getTemplates() {
+// ---- HELPER: Cek role admin ----
+async function requireAdmin() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Tidak terautentikasi.')
 
-  const { data, error } = await supabase
-    .from('template')
-    .select(`
-      *,
-      template_detail (
-        *,
-        pegawai (id, name, gender)
-      )
-    `)
-    .order('created_at', { ascending: true })
+  const { data: pegawai } = (await supabase
+    .from('pegawai')
+    .select('role')
+    .eq('id', user.id)
+    .single()) as any
 
-  if (error) throw new Error(error.message)
-  return data
+  if (pegawai?.role !== 'admin') {
+    throw new Error('Akses ditolak. Hanya admin yang dapat melakukan tindakan ini.')
+  }
+
+  return { supabase }
 }
 
-// ---- ASSIGN TEMPLATE TO WEEKS ----
-export async function assignTemplateToWeeks(
+// ---- ASSIGN TEMPLATE TO RANGE ----
+export async function assignJadwal(
   templateId: string,
-  dates: string[] // array of ISO date strings (hanya Senin-Jumat)
+  startDate: string, // YYYY-MM-DD
+  endDate: string    // YYYY-MM-DD
 ) {
-  const supabase = await createClient()
+  const { supabase } = await requireAdmin()
 
-  // Ambil detail template
-  const { data: details, error: detailError } = await supabase
+  // 1. Ambil detail template
+  const { data: details, error: detailError } = (await supabase
     .from('template_detail')
     .select('day_of_week, pegawai_id')
-    .eq('template_id', templateId)
+    .eq('template_id', templateId)) as any
 
-  if (detailError || !details) throw new Error('Template tidak ditemukan.')
+  if (detailError || !details || details.length === 0) {
+    throw new Error('Template tidak ditemukan atau tidak memiliki alokasi petugas.')
+  }
 
-  // Build rows jadwal_piket dari tanggal yang dipilih
-  const rows = dates.flatMap((dateStr) => {
-    const dayOfWeek = new Date(dateStr).getDay() // 0=Sun, 1=Mon, ...
-    // Convert ke 1-5 (Senin-Jumat)
-    const mappedDay = dayOfWeek === 0 ? 7 : dayOfWeek
+  // 2. Generate baris jadwal_piket
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+  const rows: any[] = []
 
-    const pegawaiForDay = details.filter(d => d.day_of_week === mappedDay)
-    return pegawaiForDay.map(d => ({
-      tanggal: dateStr,
-      pegawai_id: d.pegawai_id,
-      template_id: templateId,
-    }))
-  })
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const dayOfWeek = d.getDay() // 0=Minggu, 1=Senin, ..., 6=Sabtu
+    
+    // Hanya Senin-Jumat (1-5)
+    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+      const dateStr = d.toISOString().split('T')[0]
+      
+      // Ambil petugas untuk hari ini
+      const pegawais = details.filter((detail: any) => detail.day_of_week === dayOfWeek)
+      
+      pegawais.forEach((p: any) => {
+        rows.push({
+          tanggal: dateStr,
+          pegawai_id: p.pegawai_id,
+          template_id: templateId
+        })
+      })
+    }
+  }
 
-  if (rows.length === 0) return { success: false, message: 'Tidak ada jadwal yang dibuat.' }
+  if (rows.length === 0) {
+    return { success: false, message: 'Tidak ada jadwal yang dihasilkan untuk rentang tanggal ini (mungkin hanya akhir pekan).' }
+  }
 
+  // 3. Insert ke database (bulk)
   const { error } = await supabase
     .from('jadwal_piket')
     .upsert(rows, { onConflict: 'tanggal,pegawai_id', ignoreDuplicates: true })
 
   if (error) throw new Error(error.message)
 
-  revalidatePath('/piket')
+  revalidatePath('/dashboard/jadwal')
   return { success: true, count: rows.length }
 }
 

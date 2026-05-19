@@ -2,38 +2,85 @@
 
 // ============================================================
 // Server Actions — Pegawai
-// CRUD untuk tabel pegawai
+// CRUD untuk tabel pegawai (admin only)
 // ============================================================
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { createPegawaiSchema, updatePegawaiSchema } from '@/lib/validations/pegawai'
+import type { Pegawai } from '@/lib/types/database'
+
+// ---- HELPER: Cek role admin ----
+async function requireAdmin() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Tidak terautentikasi.' }
+
+  const { data: pegawai } = await supabase
+    .from('pegawai')
+    .select('role')
+    .eq('id', user.id)
+    .single() as { data: Pick<Pegawai, 'role'> | null, error: unknown }
+
+  if (pegawai?.role !== 'admin') {
+    return { error: 'Akses ditolak. Hanya admin yang dapat melakukan tindakan ini.' }
+  }
+
+  return { supabase, userId: user.id }
+}
 
 // ---- GET ALL PEGAWAI ----
 export async function getPegawai() {
   const supabase = await createClient()
 
-  const { data, error } = await supabase
+  const { data, error } = (await supabase
     .from('pegawai')
     .select('*')
-    .order('name', { ascending: true })
+    .order('name', { ascending: true })) as any
 
   if (error) throw new Error(error.message)
   return data
 }
 
-// ---- CREATE PEGAWAI ----
-// Membuat auth user sekaligus profile pegawai
-export async function createPegawai(formData: FormData) {
+// ---- GET PEGAWAI BY ID ----
+export async function getPegawaiById(id: string) {
   const supabase = await createClient()
 
-  const name     = formData.get('name') as string
-  const username = formData.get('username') as string
-  const email    = formData.get('email') as string
-  const password = formData.get('password') as string
-  const gender   = formData.get('gender') as 'L' | 'P'
-  const role     = (formData.get('role') as string) || 'petugas'
+  const { data, error } = (await supabase
+    .from('pegawai')
+    .select('*')
+    .eq('id', id)
+    .single()) as any
 
-  // 1. Buat auth user dulu (inviteByEmail lebih aman dari createUser di client)
+  if (error) return null
+  return data
+}
+
+// ---- CREATE PEGAWAI (admin only) ----
+export async function createPegawai(formData: FormData) {
+  const adminCheck = await requireAdmin()
+  if ('error' in adminCheck) return adminCheck
+
+  const raw = {
+    name:     formData.get('name') as string,
+    username: formData.get('username') as string,
+    email:    formData.get('email') as string,
+    phone:    (formData.get('phone') as string) || undefined,
+    password: formData.get('password') as string,
+    gender:   formData.get('gender') as 'L' | 'P',
+    role:     (formData.get('role') as string) || 'petugas',
+  }
+
+  const parsed = createPegawaiSchema.safeParse(raw)
+  if (!parsed.success) {
+    const firstError = parsed.error.issues[0]?.message ?? 'Input tidak valid.'
+    return { error: firstError }
+  }
+
+  const { name, username, email, phone, password, gender, role } = parsed.data
+  const { supabase } = adminCheck
+
+  // 1. Buat auth user via admin API (butuh service role key)
   const { data: authData, error: authError } = await supabase.auth.admin.createUser({
     email,
     password,
@@ -44,13 +91,21 @@ export async function createPegawai(formData: FormData) {
     return { error: authError?.message ?? 'Gagal membuat akun.' }
   }
 
-  // 2. Insert profile pegawai dengan id dari auth user
-  const { error: profileError } = await supabase
+  // 2. Insert profile pegawai
+  const { error: profileError } = (await supabase
     .from('pegawai')
-    .insert({ id: authData.user.id, name, username, email, gender, role })
+    .insert({
+      id: authData.user.id,
+      name,
+      username,
+      email,
+      phone: phone ?? null,
+      gender,
+      role,
+    } as any)) as any
 
   if (profileError) {
-    // Rollback: hapus auth user jika insert profile gagal
+    // Rollback: hapus auth user jika profile gagal
     await supabase.auth.admin.deleteUser(authData.user.id)
     return { error: profileError.message }
   }
@@ -59,22 +114,32 @@ export async function createPegawai(formData: FormData) {
   return { success: true }
 }
 
-// ---- UPDATE PEGAWAI ----
+// ---- UPDATE PEGAWAI (admin only) ----
 export async function updatePegawai(id: string, formData: FormData) {
-  const supabase = await createClient()
+  const adminCheck = await requireAdmin()
+  if ('error' in adminCheck) return adminCheck
 
-  const updates = {
-    name:       formData.get('name') as string,
-    username:   formData.get('username') as string,
-    gender:     formData.get('gender') as 'L' | 'P',
-    role:       formData.get('role') as string,
-    avatar_url: formData.get('avatar_url') as string | null,
+  const raw = {
+    name:     formData.get('name') as string,
+    username: formData.get('username') as string,
+    phone:    (formData.get('phone') as string) || undefined,
+    gender:   formData.get('gender') as 'L' | 'P',
+    role:     formData.get('role') as 'admin' | 'petugas',
   }
 
-  const { error } = await supabase
+  const parsed = updatePegawaiSchema.safeParse(raw)
+  if (!parsed.success) {
+    const firstError = parsed.error.issues[0]?.message ?? 'Input tidak valid.'
+    return { error: firstError }
+  }
+
+  const { name, username, phone, gender, role } = parsed.data
+  const { supabase } = adminCheck
+
+  const { error } = (await supabase
     .from('pegawai')
-    .update(updates)
-    .eq('id', id)
+    .update({ name, username, phone: phone ?? null, gender, role } as any)
+    .eq('id', id)) as any
 
   if (error) return { error: error.message }
 
@@ -82,11 +147,14 @@ export async function updatePegawai(id: string, formData: FormData) {
   return { success: true }
 }
 
-// ---- DELETE PEGAWAI ----
+// ---- DELETE PEGAWAI (admin only) ----
 export async function deletePegawai(id: string) {
-  const supabase = await createClient()
+  const adminCheck = await requireAdmin()
+  if ('error' in adminCheck) return adminCheck
 
-  // Hapus auth user (cascade ke tabel pegawai via FK)
+  const { supabase } = adminCheck
+
+  // Hapus auth user → cascade ke tabel pegawai via FK
   const { error } = await supabase.auth.admin.deleteUser(id)
   if (error) return { error: error.message }
 

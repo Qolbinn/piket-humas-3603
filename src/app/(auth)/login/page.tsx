@@ -1,17 +1,46 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
-import Image from "next/image";
+'use client'
+
+import { useTransition } from 'react'
+import { useForm } from 'react-hook-form'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import Link from 'next/link'
+import Image from 'next/image'
+import { loginAction } from '@/lib/actions/auth'
+import { Loader2 } from 'lucide-react'
+import { useState } from 'react'
 
 export default function LoginPage() {
+  const [isPending, startTransition] = useTransition()
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const { register, handleSubmit } = useForm<{ email: string; password: string }>()
+
+  function onSubmit(data: { email: string; password: string }) {
+    setErrorMsg(null)
+    startTransition(async () => {
+      const formData = new FormData()
+      formData.append('email', data.email)
+      formData.append('password', data.password)
+      const result = await loginAction(formData)
+      if (result?.error) setErrorMsg(result.error)
+    })
+  }
+
   return (
     <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-gradient-to-br from-primary/5 via-background to-secondary/5 relative overflow-hidden">
       {/* Decorative blobs */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[120px]"></div>
-        <div className="absolute top-[60%] -right-[10%] w-[40%] h-[60%] rounded-full bg-secondary/10 blur-[100px]"></div>
+        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[120px]" />
+        <div className="absolute top-[60%] -right-[10%] w-[40%] h-[60%] rounded-full bg-secondary/10 blur-[100px]" />
       </div>
 
       <Link href="/" className="flex items-center gap-3 mb-8 hover:opacity-80 transition-opacity">
@@ -23,42 +52,77 @@ export default function LoginPage() {
           <span className="text-sm font-medium text-muted-foreground">Badan Pusat Statistik</span>
         </div>
       </Link>
-      
+
       <Card className="w-full max-w-md border-muted/50 shadow-xl shadow-primary/5 backdrop-blur-sm bg-background/95">
         <CardHeader className="space-y-1 pb-6">
           <CardTitle className="text-2xl font-bold tracking-tight">Login Petugas</CardTitle>
           <CardDescription className="text-base">
-            Masukkan email dan password Anda untuk masuk ke dashboard manajemen.
+            Masukkan email dan password untuk masuk ke dashboard.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="email" className="font-semibold">Email</Label>
-            <Input id="email" type="email" placeholder="nama@bps.go.id" className="h-11 bg-muted/50 focus:bg-background transition-colors" />
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="font-semibold">Password</Label>
-              <Link href="/forgot-password" className="text-sm font-medium text-primary hover:text-primary/80 hover:underline transition-colors">
-                Lupa password?
-              </Link>
+
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <CardContent className="space-y-5">
+            {/* Error message */}
+            {errorMsg && (
+              <div className="rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm px-4 py-3">
+                {errorMsg}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="email" className="font-semibold">Alamat Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="nama@bps.go.id"
+                className="h-11 bg-muted/50 focus:bg-background transition-colors"
+                {...register('email', { required: true })}
+                disabled={isPending}
+              />
             </div>
-            <Input id="password" type="password" className="h-11 bg-muted/50 focus:bg-background transition-colors" />
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-5 pt-2">
-          <Link href="/dashboard" className="w-full">
-            <Button className="w-full h-11 text-base font-medium shadow-md shadow-primary/20 hover:shadow-primary/30 transition-all">
-              Masuk Dashboard
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="font-semibold">Password</Label>
+                <Link
+                  href="/forgot-password"
+                  className="text-sm font-medium text-primary hover:text-primary/80 hover:underline transition-colors"
+                >
+                  Lupa password?
+                </Link>
+              </div>
+              <Input
+                id="password"
+                type="password"
+                className="h-11 bg-muted/50 focus:bg-background transition-colors"
+                {...register('password', { required: true })}
+                disabled={isPending}
+              />
+            </div>
+          </CardContent>
+
+          <CardFooter className="flex flex-col gap-5 pt-2">
+            <Button
+              type="submit"
+              id="login-submit"
+              disabled={isPending}
+              className="w-full h-11 text-base font-medium shadow-md shadow-primary/20 hover:shadow-primary/30 transition-all"
+            >
+              {isPending ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memverifikasi...</>
+              ) : (
+                'Masuk Dashboard'
+              )}
             </Button>
-          </Link>
-          <div className="text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
-            <span className="h-px flex-1 bg-border"></span>
-            <span className="px-2">Sistem Informasi Layanan BPS</span>
-            <span className="h-px flex-1 bg-border"></span>
-          </div>
-        </CardFooter>
+            <div className="text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
+              <span className="h-px flex-1 bg-border" />
+              <span className="px-2">Sistem Informasi Layanan BPS</span>
+              <span className="h-px flex-1 bg-border" />
+            </div>
+          </CardFooter>
+        </form>
       </Card>
     </div>
-  );
+  )
 }

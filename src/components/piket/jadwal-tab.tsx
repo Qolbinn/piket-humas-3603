@@ -1,36 +1,50 @@
 "use client";
 
-import { useState } from "react";
-import { format, addMonths, subMonths, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, startOfWeek, endOfWeek } from "date-fns";
+import { useState, useEffect } from "react";
+import { format, addMonths, subMonths, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, startOfWeek, endOfWeek, isSameDay } from "date-fns";
 import { id } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { getJadwalByMonth } from "@/lib/actions/jadwal";
 
-// Mock Data Pegawai
-const mockPegawai = [
-  { id: 1, name: "Budi Santoso", gender: "L" },
-  { id: 2, name: "Siti Aminah", gender: "P" },
-  { id: 3, name: "Andi Permana", gender: "L" },
-  { id: 4, name: "Rina Kartika", gender: "P" },
-  { id: 5, name: "Dewi Lestari", gender: "P" },
-];
+interface JadwalTabProps {
+  initialData: any[];
+}
 
-// Mock Schedule
-const getMockSchedule = (date: Date) => {
-  const day = date.getDate();
-  // Generate pseudo-random schedules based on day
-  if (day % 5 === 0) return [mockPegawai[0], mockPegawai[3], mockPegawai[1]];
-  if (day % 3 === 0) return [mockPegawai[2], mockPegawai[4]];
-  if (day % 7 === 0) return [mockPegawai[1], mockPegawai[3], mockPegawai[4]];
-  if (day % 2 === 0) return [mockPegawai[0]];
-  return [];
-};
-
-export function JadwalTab() {
+export function JadwalTab({ initialData }: JadwalTabProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [jadwal, setJadwal] = useState(initialData);
+  const [isLoading, setIsLoading] = useState(false);
   
   const goToToday = () => setCurrentDate(new Date());
+
+  // Fetch data when month changes
+  useEffect(() => {
+    const fetchNewJadwal = async () => {
+      setIsLoading(true);
+      try {
+        const data = await getJadwalByMonth(currentDate.getFullYear(), currentDate.getMonth() + 1);
+        setJadwal(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Skip initial fetch if it's the current month (already has initialData)
+    const now = new Date();
+    if (currentDate.getFullYear() === now.getFullYear() && currentDate.getMonth() === now.getMonth()) {
+      setJadwal(initialData);
+    } else {
+      fetchNewJadwal();
+    }
+  }, [currentDate.getMonth(), currentDate.getFullYear(), initialData]);
+
+  const getScheduleForDay = (date: Date) => {
+    return jadwal.filter(item => isSameDay(new Date(item.tanggal), date));
+  };
 
   // --- DESKTOP LOGIC (MONTH) ---
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
@@ -68,7 +82,7 @@ export function JadwalTab() {
       <div className="hidden md:flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-card border rounded-2xl shadow-sm">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-primary/10 rounded-xl">
-            <CalendarIcon className="h-6 w-6 text-primary" />
+            {isLoading ? <Loader2 className="h-6 w-6 text-primary animate-spin" /> : <CalendarIcon className="h-6 w-6 text-primary" />}
           </div>
           <div>
             <h2 className="text-xl font-bold capitalize">
@@ -129,7 +143,10 @@ export function JadwalTab() {
       </div>
 
       {/* --- DESKTOP CALENDAR GRID (Hidden on mobile) --- */}
-      <div className="hidden md:block bg-card border rounded-2xl shadow-sm overflow-hidden">
+      <div className="hidden md:block bg-card border rounded-2xl shadow-sm overflow-hidden relative">
+        {isLoading && <div className="absolute inset-0 bg-background/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 text-primary animate-spin" />
+        </div>}
         <div className="grid grid-cols-7 border-b bg-muted/40">
           {shortWeekDaysLabels.map((day, idx) => (
             <div key={day} className={cn("p-3 text-center text-sm font-semibold", 
@@ -142,7 +159,7 @@ export function JadwalTab() {
         
         <div className="grid grid-cols-7 auto-rows-[140px]">
           {monthDays.map((day, dayIdx) => {
-            const schedule = getMockSchedule(day);
+            const schedule = getScheduleForDay(day);
             const isCurrentMonth = isSameMonth(day, monthStart);
             const isTodayDate = isToday(day);
 
@@ -167,18 +184,18 @@ export function JadwalTab() {
                 </div>
 
                 <div className="flex flex-col gap-1.5 overflow-y-auto no-scrollbar">
-                  {schedule.slice(0, 3).map((pegawai, i) => (
+                  {schedule.slice(0, 3).map((item, i) => (
                     <div 
                       key={i} 
                       className={cn(
                         "text-[11px] px-2 py-1.5 rounded-md font-medium truncate border shadow-sm transition-all hover:scale-[1.02]",
-                        pegawai.gender === 'L' 
+                        item.pegawai.gender === 'L' 
                           ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800" 
                           : "bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-900/20 dark:text-pink-400 dark:border-pink-800"
                       )}
-                      title={pegawai.name}
+                      title={item.pegawai.name}
                     >
-                      {pegawai.name}
+                      {item.pegawai.name}
                     </div>
                   ))}
                   {schedule.length > 3 && (
@@ -194,9 +211,12 @@ export function JadwalTab() {
       </div>
 
       {/* --- MOBILE CALENDAR LIST (Hidden on desktop) --- */}
-      <div className="md:hidden flex flex-col gap-3">
+      <div className="md:hidden flex flex-col gap-3 relative">
+        {isLoading && <div className="absolute inset-0 bg-background/50 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-2xl">
+          <Loader2 className="h-8 w-8 text-primary animate-spin" />
+        </div>}
         {weekDaysInterval.map((day, idx) => {
-          const schedule = getMockSchedule(day);
+          const schedule = getScheduleForDay(day);
           const isTodayDate = isToday(day);
           const isWeekend = idx >= 5;
 
@@ -227,12 +247,12 @@ export function JadwalTab() {
 
               {schedule.length > 0 ? (
                 <div className="flex flex-col gap-2">
-                  {schedule.map((pegawai, i) => (
+                  {schedule.map((item, i) => (
                     <div 
                       key={i} 
                       className={cn(
                         "text-sm px-3 py-2 rounded-lg font-medium border flex items-center justify-between",
-                        pegawai.gender === 'L' 
+                        item.pegawai.gender === 'L' 
                           ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800" 
                           : "bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-900/20 dark:text-pink-400 dark:border-pink-800"
                       )}
@@ -240,9 +260,9 @@ export function JadwalTab() {
                       <div className="flex items-center gap-2">
                         <div className={cn(
                           "w-2 h-2 rounded-full", 
-                          pegawai.gender === 'L' ? "bg-blue-500" : "bg-pink-500"
+                          item.pegawai.gender === 'L' ? "bg-blue-500" : "bg-pink-500"
                         )} />
-                        {pegawai.name}
+                        {item.pegawai.name}
                       </div>
                     </div>
                   ))}

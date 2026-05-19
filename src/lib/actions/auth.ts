@@ -8,8 +8,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import type { Pegawai } from '@/lib/types/database'
 
-// ---- LOGIN ----
 export async function loginAction(formData: FormData) {
   const supabase = await createClient()
 
@@ -23,7 +23,7 @@ export async function loginAction(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
-    return { error: 'Email atau password salah. Silakan coba lagi.' }
+    return { error: 'Username/Email atau password salah. Silakan coba lagi.' }
   }
 
   revalidatePath('/', 'layout')
@@ -64,11 +64,37 @@ export async function getCurrentPegawai() {
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return null
 
-  const { data: pegawai } = await supabase
+  const { data: pegawai } = (await supabase
     .from('pegawai')
     .select('*')
     .eq('id', user.id)
-    .single()
+    .single()) as any
 
-  return pegawai
+  return pegawai as Pegawai | null
+}
+
+// ---- UPDATE PROFILE (self) ----
+export async function updateProfileAction(formData: FormData) {
+  const supabase = await createClient()
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { error: 'Sesi tidak ditemukan, silakan login ulang.' }
+
+  const name  = formData.get('name') as string
+  const phone = (formData.get('phone') as string) || null
+
+  if (!name || name.length < 3) {
+    return { error: 'Nama minimal 3 karakter.' }
+  }
+
+  const { error } = (await supabase
+    .from('pegawai')
+    .update({ name, phone } as any)
+    .eq('id', user.id)) as any
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/profile')
+  revalidatePath('/', 'layout')
+  return { success: true }
 }

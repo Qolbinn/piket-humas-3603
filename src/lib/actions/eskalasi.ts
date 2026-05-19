@@ -7,6 +7,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import type { Eskalasi } from '@/lib/types/database'
 
 // ---- GET ESKALASI (dengan filter status) ----
 export async function getEskalasi(status?: 'waiting' | 'handled' | 'closed') {
@@ -59,7 +60,7 @@ export async function handleEskalasi(id: string, pegawaiId: string) {
     .from('eskalasi')
     .select('created_at')
     .eq('id', id)
-    .single()
+    .single() as { data: { created_at: string } | null, error: unknown }
 
   let waktuRespons: number | null = null
   if (eskalasi?.created_at) {
@@ -67,15 +68,15 @@ export async function handleEskalasi(id: string, pegawaiId: string) {
     waktuRespons = Math.round(diffMs / 1000 / 60) // dalam menit
   }
 
-  const { error } = await supabase
+  const { error } = (await supabase
     .from('eskalasi')
     .update({
       status: 'handled',
       pegawai_id: pegawaiId,
       handled_at: handledAt,
       waktu_respons: waktuRespons,
-    })
-    .eq('id', id)
+    } as any)
+    .eq('id', id)) as any
 
   if (error) return { error: error.message }
 
@@ -87,10 +88,10 @@ export async function handleEskalasi(id: string, pegawaiId: string) {
 export async function closeEskalasi(id: string) {
   const supabase = await createClient()
 
-  const { error } = await supabase
+  const { error } = (await supabase
     .from('eskalasi')
-    .update({ status: 'closed' })
-    .eq('id', id)
+    .update({ status: 'closed' } as any)
+    .eq('id', id)) as any
 
   if (error) return { error: error.message }
 

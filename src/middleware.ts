@@ -36,9 +36,8 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  // Protected routes: semua halaman di /dashboard, /piket, /pegawai, /pelanggan
-  // const protectedPaths = ['/dashboard', '/piket', '/pegawai', '/pelanggan']
-  const protectedPaths = ['/profile']
+  // Protected routes: semua halaman di /dashboard, /piket, /pegawai, /pelanggan, /profile
+  const protectedPaths = ['/dashboard', '/piket', '/pegawai', '/pelanggan', '/profile']
   const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path))
 
   // Auth routes: /login, /forgot-password

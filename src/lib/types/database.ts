@@ -1,21 +1,26 @@
 // ============================================================
-// Database Types — generated from ERD schema
+// Database Types — Manual definitions to match Supabase v2
 // ============================================================
+
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export type Gender = 'L' | 'P'
 export type Role = 'admin' | 'petugas'
 export type EskalasiStatus = 'waiting' | 'handled' | 'closed'
-export type DayOfWeek = 1 | 2 | 3 | 4 | 5 // 1=Senin ... 5=Jumat
+export type DayOfWeek = 1 | 2 | 3 | 4 | 5
 
-// ============================================================
-// Table Row Types
-// ============================================================
-
-export interface Pegawai {
+export type Pegawai = {
   id: string
   name: string
   username: string
   email: string
+  phone: string | null
   gender: Gender
   role: Role
   avatar_url: string | null
@@ -23,36 +28,34 @@ export interface Pegawai {
   updated_at: string
 }
 
-export interface Template {
+export type Template = {
   id: string
   name: string
   created_at: string
   updated_at: string
 }
 
-export interface TemplateDetail {
+export type TemplateDetail = {
   id: string
   template_id: string
   day_of_week: DayOfWeek
   pegawai_id: string
   created_at: string
-  // Joined relations
   pegawai?: Pegawai
   template?: Template
 }
 
-export interface JadwalPiket {
+export type JadwalPiket = {
   id: string
-  tanggal: string // ISO date string YYYY-MM-DD
+  tanggal: string
   pegawai_id: string
   template_id: string | null
   created_at: string
-  // Joined relations
   pegawai?: Pegawai
   template?: Template
 }
 
-export interface Eskalasi {
+export type Eskalasi = {
   id: string
   nomor_pelanggan: string
   nama_pelanggan: string
@@ -60,74 +63,152 @@ export interface Eskalasi {
   detail: string | null
   pegawai_id: string | null
   status: EskalasiStatus
-  waktu_respons: number | null // dalam menit
+  waktu_respons: number | null
   created_at: string
   handled_at: string | null
-  // Joined relations
   pegawai?: Pegawai
 }
 
-export interface RiwayatPelanggan {
+export type RiwayatPelanggan = {
   id: number
   nomor_hp: string
   created_at: string
 }
 
-// ============================================================
-// Supabase Database Generic Type
-// ============================================================
-
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       pegawai: {
         Row: Pegawai
-        Insert: Omit<Pegawai, 'created_at' | 'updated_at'> & {
+        Insert: {
+          id: string
+          name: string
+          username: string
+          email: string
+          phone?: string | null
+          gender: Gender
+          role?: Role
+          avatar_url?: string | null
           created_at?: string
           updated_at?: string
         }
-        Update: Partial<Omit<Pegawai, 'id' | 'created_at'>>
+        Update: {
+          id?: string
+          name?: string
+          username?: string
+          email?: string
+          phone?: string | null
+          gender?: Gender
+          role?: Role
+          avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       template: {
         Row: Template
-        Insert: Omit<Template, 'id' | 'created_at' | 'updated_at'> & {
+        Insert: {
           id?: string
+          name: string
           created_at?: string
           updated_at?: string
         }
-        Update: Partial<Omit<Template, 'id' | 'created_at'>>
+        Update: {
+          id?: string
+          name?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       template_detail: {
         Row: TemplateDetail
-        Insert: Omit<TemplateDetail, 'id' | 'created_at' | 'pegawai' | 'template'> & {
+        Insert: {
           id?: string
+          template_id: string
+          day_of_week: DayOfWeek
+          pegawai_id: string
           created_at?: string
         }
-        Update: Partial<Omit<TemplateDetail, 'id' | 'created_at'>>
+        Update: {
+          id?: string
+          template_id?: string
+          day_of_week?: DayOfWeek
+          pegawai_id?: string
+          created_at?: string
+        }
+        Relationships: []
       }
       jadwal_piket: {
         Row: JadwalPiket
-        Insert: Omit<JadwalPiket, 'id' | 'created_at' | 'pegawai' | 'template'> & {
+        Insert: {
           id?: string
+          tanggal: string
+          pegawai_id: string
+          template_id?: string | null
           created_at?: string
         }
-        Update: Partial<Omit<JadwalPiket, 'id' | 'created_at'>>
+        Update: {
+          id?: string
+          tanggal?: string
+          pegawai_id?: string
+          template_id?: string | null
+          created_at?: string
+        }
+        Relationships: []
       }
       eskalasi: {
         Row: Eskalasi
-        Insert: Omit<Eskalasi, 'id' | 'created_at' | 'pegawai'> & {
+        Insert: {
           id?: string
+          nomor_pelanggan: string
+          nama_pelanggan: string
+          keperluan: string
+          detail?: string | null
+          pegawai_id?: string | null
+          status?: EskalasiStatus
+          waktu_respons?: number | null
           created_at?: string
+          handled_at?: string | null
         }
-        Update: Partial<Omit<Eskalasi, 'id' | 'created_at'>>
+        Update: {
+          id?: string
+          nomor_pelanggan?: string
+          nama_pelanggan?: string
+          keperluan?: string
+          detail?: string | null
+          pegawai_id?: string | null
+          status?: EskalasiStatus
+          waktu_respons?: number | null
+          created_at?: string
+          handled_at?: string | null
+        }
+        Relationships: []
       }
       riwayat_pelanggan: {
         Row: RiwayatPelanggan
-        Insert: Omit<RiwayatPelanggan, 'id' | 'created_at'> & {
+        Insert: {
+          id?: number
+          nomor_hp: string
           created_at?: string
         }
-        Update: never
+        Update: {
+          id?: number
+          nomor_hp?: string
+          created_at?: string
+        }
+        Relationships: []
       }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
     }
   }
 }

@@ -10,6 +10,7 @@ import {
   Users, 
   UserCircle, 
   MessageSquare,
+  ClipboardList,
   LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,7 @@ const menuItems = [
   { name: "Jadwal Piket", href: "/piket", icon: CalendarDays },
   { name: "Data Pegawai", href: "/pegawai", icon: Users },
   { name: "Data Pelanggan", href: "/pelanggan", icon: MessageSquare },
-  { name: "Profil Saya", href: "/profil", icon: UserCircle },
+  { name: "Profil Saya", href: "/profile", icon: UserCircle },
 ];
 
 export function DashboardSidebar() {
