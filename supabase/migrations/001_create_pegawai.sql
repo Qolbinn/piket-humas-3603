@@ -1,6 +1,5 @@
 -- ============================================================
 -- Migration 001: Create pegawai table
--- Linked to Supabase Auth via auth.users
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS public.pegawai (
@@ -8,9 +7,10 @@ CREATE TABLE IF NOT EXISTS public.pegawai (
   name       TEXT NOT NULL,
   username   TEXT NOT NULL UNIQUE,
   email      TEXT NOT NULL UNIQUE,
-  phone      TEXT UNIQUE,
+  phone      TEXT,
+  lid_wa     TEXT UNIQUE,
   gender     TEXT NOT NULL CHECK (gender IN ('L', 'P')),
-  role       TEXT NOT NULL DEFAULT 'petugas' CHECK (role IN ('admin', 'petugas')),
+  role       TEXT NOT NULL DEFAULT 'petugas' CHECK (role IN ('admin', 'petugas', 'pimpinan')),
   avatar_url TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -36,21 +36,23 @@ ALTER TABLE public.pegawai ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "pegawai_select" ON public.pegawai
   FOR SELECT TO authenticated USING (true);
 
--- RLS: Hanya admin yang bisa insert/update/delete
+-- RLS: Hanya admin yang bisa insert/delete
 CREATE POLICY "pegawai_insert_admin" ON public.pegawai
   FOR INSERT TO authenticated
   WITH CHECK (
     (SELECT role FROM public.pegawai WHERE id = auth.uid()) = 'admin'
   );
 
-CREATE POLICY "pegawai_update_admin" ON public.pegawai
-  FOR UPDATE TO authenticated
+CREATE POLICY "pegawai_delete_admin" ON public.pegawai
+  FOR DELETE TO authenticated
   USING (
     (SELECT role FROM public.pegawai WHERE id = auth.uid()) = 'admin'
   );
 
-CREATE POLICY "pegawai_delete_admin" ON public.pegawai
-  FOR DELETE TO authenticated
+-- RLS: Update bisa oleh admin ATAU diri sendiri
+CREATE POLICY "pegawai_update" ON public.pegawai
+  FOR UPDATE TO authenticated
   USING (
+    id = auth.uid() OR 
     (SELECT role FROM public.pegawai WHERE id = auth.uid()) = 'admin'
   );
