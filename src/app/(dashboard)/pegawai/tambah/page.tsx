@@ -27,7 +27,7 @@ type FormValues = {
   phone?: string
   password: string
   gender: 'L' | 'P'
-  role: 'admin' | 'petugas'
+  role: 'admin' | 'pimpinan' | 'petugas'
 }
 
 export default function TambahPegawaiPage() {
@@ -162,13 +162,14 @@ export default function TambahPegawaiPage() {
               <Label htmlFor="role">Role</Label>
               <Select
                 defaultValue="petugas"
-                onValueChange={(v) => setValue('role', v as 'admin' | 'petugas')}
+                onValueChange={(v) => setValue('role', v as 'admin' | 'pimpinan' | 'petugas')}
               >
                 <SelectTrigger id="role" className="rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="petugas">Petugas</SelectItem>
+                  <SelectItem value="pimpinan">Pimpinan</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                 </SelectContent>
               </Select>

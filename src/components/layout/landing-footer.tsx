@@ -7,7 +7,7 @@ export function LandingFooter() {
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
-            <Image src="/logo-bps.svg" alt="Logo BPS" width={32} height={32} className="h-8 w-auto grayscale opacity-70" />
+            <Image src="/logo-bps.svg" alt="Logo BPS" width={32} height={32} className="h-8 w-auto grayscale opacity-70" style={{ width: "auto" }} />
             <span className="text-xl font-bold tracking-tight text-muted-foreground">Piket Humas</span>
           </div>
           <p className="text-sm text-muted-foreground text-center md:text-left">

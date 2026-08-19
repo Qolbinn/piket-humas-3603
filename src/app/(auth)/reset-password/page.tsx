@@ -1,6 +1,6 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useTransition, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,26 +15,30 @@ import {
 } from '@/components/ui/card'
 import Link from 'next/link'
 import Image from 'next/image'
-import { loginAction } from '@/lib/actions/auth'
+import { resetPasswordAction } from '@/lib/actions/auth'
 import { Loader2 } from 'lucide-react'
-import { useState } from 'react'
 
-export default function LoginPage() {
+export default function ResetPasswordPage() {
   const [isPending, startTransition] = useTransition()
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
-  const { register, handleSubmit } = useForm<{ email: string; password: string }>()
+  const [successMsg, setSuccessMsg] = useState<string | null>(null)
+  const { register, handleSubmit } = useForm<{ password: string; confirmPassword: string }>()
 
-  function onSubmit(data: { email: string; password: string }) {
+  function onSubmit(data: { password: string; confirmPassword: string }) {
     setErrorMsg(null)
-    
-    const finalIdentifier = data.email.trim()
+    setSuccessMsg(null)
 
+    if (data.password !== data.confirmPassword) {
+      setErrorMsg("Password dan konfirmasi password tidak sama.")
+      return
+    }
+    
     startTransition(async () => {
       const formData = new FormData()
-      formData.append('email', finalIdentifier)
       formData.append('password', data.password)
-      const result = await loginAction(formData)
+      const result = await resetPasswordAction(formData)
       if (result?.error) setErrorMsg(result.error)
+      if (result?.success) setSuccessMsg(result.success)
     })
   }
 
@@ -58,71 +62,69 @@ export default function LoginPage() {
 
       <Card className="w-full max-w-md border-muted/50 shadow-xl shadow-primary/5 backdrop-blur-sm bg-background/95">
         <CardHeader className="space-y-1 pb-6">
-          <CardTitle className="text-2xl font-bold tracking-tight">Login Petugas</CardTitle>
+          <CardTitle className="text-2xl font-bold tracking-tight">Atur Ulang Password</CardTitle>
           <CardDescription className="text-base">
-            Masukkan username (atau email) dan password untuk masuk ke dashboard.
+            Silakan masukkan password baru Anda.
           </CardDescription>
         </CardHeader>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-5">
-            {/* Error message */}
             {errorMsg && (
               <div className="rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm px-4 py-3">
                 {errorMsg}
               </div>
             )}
-
-            <div className="space-y-2">
-              <Label htmlFor="email" className="font-semibold">Username / Email</Label>
-              <Input
-                id="email"
-                type="text"
-                placeholder="nama (atau nama@bps.go.id)"
-                className="h-11 bg-muted/50 focus:bg-background transition-colors"
-                {...register('email', { required: true })}
-                disabled={isPending}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="font-semibold">Password</Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-sm font-medium text-primary hover:text-primary/80 hover:underline transition-colors"
-                >
-                  Lupa password?
-                </Link>
+            
+            {successMsg && (
+              <div className="rounded-xl bg-green-500/10 border border-green-500/20 text-green-700 dark:text-green-400 text-sm px-4 py-3">
+                {successMsg}
               </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="password" className="font-semibold">Password Baru</Label>
               <Input
                 id="password"
                 type="password"
                 className="h-11 bg-muted/50 focus:bg-background transition-colors"
                 {...register('password', { required: true })}
-                disabled={isPending}
+                disabled={isPending || !!successMsg}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword" className="font-semibold">Konfirmasi Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                className="h-11 bg-muted/50 focus:bg-background transition-colors"
+                {...register('confirmPassword', { required: true })}
+                disabled={isPending || !!successMsg}
               />
             </div>
           </CardContent>
 
           <CardFooter className="flex flex-col gap-5 pt-2">
-            <Button
-              type="submit"
-              id="login-submit"
-              disabled={isPending}
-              className="w-full h-11 text-base font-medium shadow-md shadow-primary/20 hover:shadow-primary/30 transition-all"
-            >
-              {isPending ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memverifikasi...</>
-              ) : (
-                'Masuk Dashboard'
-              )}
-            </Button>
-            <div className="text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
-              <span className="h-px flex-1 bg-border" />
-              <span className="px-2">Sistem Informasi Layanan BPS</span>
-              <span className="h-px flex-1 bg-border" />
-            </div>
+            {!successMsg ? (
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="w-full h-11 text-base font-medium shadow-md shadow-primary/20 hover:shadow-primary/30 transition-all"
+              >
+                {isPending ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Menyimpan...</>
+                ) : (
+                  'Simpan Password Baru'
+                )}
+              </Button>
+            ) : (
+              <Link href="/login" className="w-full">
+                <Button className="w-full h-11 text-base font-medium">
+                  Masuk ke Dashboard
+                </Button>
+              </Link>
+            )}
           </CardFooter>
         </form>
       </Card>

@@ -36,12 +36,12 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  // Protected routes: semua halaman di /dashboard, /piket, /pegawai, /pelanggan, /profile
-  const protectedPaths = ['/dashboard', '/piket', '/pegawai', '/pelanggan', '/profile']
+  // Protected routes: semua halaman di /dashboard, /piket, /pegawai, /pelanggan, /profile, /master, /monitoring
+  const protectedPaths = ['/dashboard', '/piket', '/pegawai', '/pelanggan', '/profile', '/master', '/monitoring']
   const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path))
 
-  // Auth routes: /login, /forgot-password
-  const authPaths = ['/login', '/forgot-password']
+  // Auth routes: /login, /forgot-password, /reset-password
+  const authPaths = ['/login', '/forgot-password', '/reset-password']
   const isAuthPath = authPaths.some(path => pathname.startsWith(path))
 
   if (isProtectedPath && !user) {
