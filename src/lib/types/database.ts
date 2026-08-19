@@ -11,7 +11,7 @@ export type Json =
   | Json[]
 
 export type Gender = 'L' | 'P'
-export type Role = 'admin' | 'petugas'
+export type Role = 'admin' | 'pimpinan' | 'petugas'
 export type EskalasiStatus = 'waiting' | 'handled' | 'closed'
 export type DayOfWeek = 1 | 2 | 3 | 4 | 5
 

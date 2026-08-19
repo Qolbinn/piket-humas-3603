@@ -140,13 +140,14 @@ export default function EditPegawaiForm({ pegawai }: EditPegawaiFormProps) {
           <Label htmlFor="edit-role">Role</Label>
           <Select
             defaultValue={pegawai.role}
-            onValueChange={(v) => setValue('role', v as 'admin' | 'petugas')}
+            onValueChange={(v) => setValue('role', v as 'admin' | 'pimpinan' | 'petugas')}
           >
             <SelectTrigger id="edit-role" className="rounded-xl">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="petugas">Petugas</SelectItem>
+              <SelectItem value="pimpinan">Pimpinan</SelectItem>
               <SelectItem value="admin">Admin</SelectItem>
             </SelectContent>
           </Select>

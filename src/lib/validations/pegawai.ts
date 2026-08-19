@@ -7,7 +7,7 @@ export const createPegawaiSchema = z.object({
   phone: z.string().min(10, { message: 'Nomor HP minimal 10 digit' }).optional(),
   password: z.string().min(6, { message: 'Password minimal 6 karakter' }),
   gender: z.enum(['L', 'P'] as const, { error: 'Jenis kelamin wajib dipilih' }),
-  role: z.enum(['admin', 'petugas'] as const).default('petugas'),
+  role: z.enum(['admin', 'pimpinan', 'petugas'] as const).default('petugas'),
 })
 
 export const updatePegawaiSchema = z.object({
@@ -15,7 +15,7 @@ export const updatePegawaiSchema = z.object({
   username: z.string().min(3, { message: 'Username minimal 3 karakter' }),
   phone: z.string().min(10, { message: 'Nomor HP minimal 10 digit' }).optional(),
   gender: z.enum(['L', 'P'] as const, { error: 'Jenis kelamin wajib dipilih' }),
-  role: z.enum(['admin', 'petugas'] as const),
+  role: z.enum(['admin', 'pimpinan', 'petugas'] as const),
 })
 
 export const updateProfileSchema = z.object({

@@ -16,22 +16,39 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const menuItems = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Jadwal Piket", href: "/piket", icon: CalendarDays },
-  { name: "Data Pegawai", href: "/pegawai", icon: Users },
-  { name: "Ekskalasi Pelanggan", href: "/pelanggan", icon: MessageSquare },
-  { name: "Profil Saya", href: "/profile", icon: UserCircle },
-];
+const getMenuItems = (role: string) => {
+  const items = [
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  ];
 
-export function DashboardSidebar() {
+  if (role === "admin" || role === "pimpinan" || role === "petugas") {
+    items.push({ name: "Jadwal Piket", href: "/piket", icon: CalendarDays });
+    items.push({ name: "Eskalasi Pelanggan", href: "/pelanggan", icon: MessageSquare });
+  }
+
+  if (role === "admin") {
+    items.push({ name: "Data Pegawai", href: "/pegawai", icon: Users });
+    items.push({ name: "Master Data", href: "/master", icon: ClipboardList });
+  }
+
+  if (role === "admin" || role === "pimpinan") {
+    items.push({ name: "Monitoring", href: "/monitoring", icon: ClipboardList }); // Update icon if needed
+  }
+
+  items.push({ name: "Profil Saya", href: "/profile", icon: UserCircle });
+
+  return items;
+};
+
+export function DashboardSidebar({ userRole }: { userRole: string }) {
   const pathname = usePathname();
+  const menuItems = getMenuItems(userRole);
 
   return (
     <div className="hidden border-r bg-muted/20 md:flex md:w-64 md:flex-col">
       <div className="flex h-16 items-center border-b px-6">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-          <Image src="/logo-bps.svg" alt="Logo" width={28} height={28} className="h-7 w-auto" />
+          <Image src="/logo-bps.svg" alt="Logo" width={28} height={28} className="h-7 w-auto" style={{ width: "auto" }} />
           <span className="text-xl text-primary font-bold">Humas</span>
         </Link>
       </div>

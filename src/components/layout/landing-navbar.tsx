@@ -7,7 +7,7 @@ export function LandingNavbar() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
-          <Image src="/logo-bps.svg" alt="Logo BPS" width={32} height={32} className="h-8 w-auto" />
+          <Image src="/logo-bps.svg" alt="Logo BPS" width={32} height={32} className="h-8 w-auto" style={{ width: "auto" }} />
           <span className="text-xl font-bold tracking-tight text-primary">Humas</span>
         </div>
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">

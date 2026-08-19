@@ -10,17 +10,35 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import type { Pegawai } from '@/lib/types/database'
 
+import { createAdminClient } from '@/lib/supabase/admin'
+
 export async function loginAction(formData: FormData) {
   const supabase = await createClient()
 
-  const email = formData.get('email') as string
+  const identifier = formData.get('email') as string
   const password = formData.get('password') as string
 
-  if (!email || !password) {
-    return { error: 'Email dan password wajib diisi.' }
+  if (!identifier || !password) {
+    return { error: 'Username/Email dan password wajib diisi.' }
   }
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  let loginEmail = identifier
+
+  if (!identifier.includes('@')) {
+    const adminSupabase = createAdminClient()
+    const { data: pegawai, error: fetchError } = await adminSupabase
+      .from('pegawai')
+      .select('email')
+      .eq('username', identifier)
+      .single()
+      
+    if (fetchError || !pegawai?.email) {
+      return { error: 'Username tidak ditemukan. Silakan coba lagi atau gunakan email.' }
+    }
+    loginEmail = pegawai.email
+  }
+
+  const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password })
 
   if (error) {
     return { error: 'Username/Email atau password salah. Silakan coba lagi.' }
@@ -41,13 +59,18 @@ export async function logoutAction() {
 export async function forgotPasswordAction(formData: FormData) {
   const supabase = await createClient()
   const email = formData.get('email') as string
+  
+  // Use headers to dynamically get the origin, fallback to localhost for safety
+  const { headers } = await import('next/headers')
+  const headersList = await headers()
+  const origin = headersList.get('origin') || 'http://localhost:3000'
 
   if (!email) {
     return { error: 'Email wajib diisi.' }
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/callback?next=/reset-password`,
+    redirectTo: `${origin}/auth/callback?next=/reset-password`,
   })
 
   if (error) {
@@ -55,6 +78,24 @@ export async function forgotPasswordAction(formData: FormData) {
   }
 
   return { success: 'Link reset password sudah dikirim ke email Anda.' }
+}
+
+// ---- RESET PASSWORD (UPDATE USER) ----
+export async function resetPasswordAction(formData: FormData) {
+  const supabase = await createClient()
+  const password = formData.get('password') as string
+
+  if (!password || password.length < 6) {
+    return { error: 'Password minimal 6 karakter.' }
+  }
+
+  const { error } = await supabase.auth.updateUser({ password })
+
+  if (error) {
+    return { error: 'Gagal mengubah password. Sesi mungkin telah kadaluarsa.' }
+  }
+
+  return { success: 'Password berhasil diubah!' }
 }
 
 // ---- GET CURRENT USER PROFILE ----
