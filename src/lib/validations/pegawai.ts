@@ -8,7 +8,7 @@ export const createPegawaiSchema = z.object({
   lid_wa: z.string().min(5, { message: 'Nomor LID WA tidak valid' }),
   password: z.string().min(6, { message: 'Password minimal 6 karakter' }),
   gender: z.enum(['L', 'P'] as const, { error: 'Jenis kelamin wajib dipilih' }),
-  role: z.enum(['admin', 'pimpinan', 'petugas'] as const).default('petugas'),
+  role: z.enum(['admin', 'pimpinan', 'petugas'] as const),
 })
 
 export const updatePegawaiSchema = z.object({

@@ -93,10 +93,10 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 -- SECTION 3: KATEGORI LAYANAN
 -- ============================================================
-INSERT INTO public.kategori_layanan (id, nama) VALUES
-  ('c1111111-1111-1111-1111-111111111111', 'Permintaan Data'),
-  ('c2222222-2222-2222-2222-222222222222', 'Konsultasi Statistik'),
-  ('c3333333-3333-3333-3333-333333333333', 'Pengaduan')
+INSERT INTO public.kategori_layanan (id, kode, nama) VALUES
+  ('c1111111-1111-1111-1111-111111111111', '1', 'Permintaan Data'),
+  ('c2222222-2222-2222-2222-222222222222', '2', 'Konsultasi Statistik'),
+  ('c3333333-3333-3333-3333-333333333333', '99', 'Pengaduan')
 ON CONFLICT (nama) DO NOTHING;
 
 -- ============================================================

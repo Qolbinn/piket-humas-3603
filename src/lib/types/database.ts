@@ -29,6 +29,15 @@ export type Pegawai = {
   updated_at: string
 }
 
+export type KategoriLayanan = {
+  id: string
+  kode: string
+  nama: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 export type Template = {
   id: string
   name: string
@@ -63,6 +72,7 @@ export type Eskalasi = {
   keperluan: string
   detail: string | null
   pegawai_id: string | null
+  kategori_kode: string | null
   status: EskalasiStatus
   waktu_respons: number | null
   created_at: string
@@ -104,6 +114,26 @@ export type Database = {
           gender?: Gender
           role?: Role
           avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      kategori_layanan: {
+        Row: KategoriLayanan
+        Insert: {
+          id?: string
+          kode: string
+          nama: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          kode?: string
+          nama?: string
+          is_active?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -170,6 +200,7 @@ export type Database = {
           keperluan: string
           detail?: string | null
           pegawai_id?: string | null
+          kategori_kode?: string | null
           status?: EskalasiStatus
           waktu_respons?: number | null
           created_at?: string
@@ -182,6 +213,7 @@ export type Database = {
           keperluan?: string
           detail?: string | null
           pegawai_id?: string | null
+          kategori_kode?: string | null
           status?: EskalasiStatus
           waktu_respons?: number | null
           created_at?: string
