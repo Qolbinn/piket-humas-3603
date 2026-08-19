@@ -4,6 +4,7 @@
 
 CREATE TABLE IF NOT EXISTS public.kategori_layanan (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  kode       TEXT NOT NULL UNIQUE,
   nama       TEXT NOT NULL UNIQUE,
   is_active  BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -18,7 +19,7 @@ CREATE TABLE IF NOT EXISTS public.eskalasi (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   pelanggan_lid     TEXT NOT NULL,
   nama_pelanggan    TEXT NOT NULL,
-  kategori_id       UUID REFERENCES public.kategori_layanan(id) ON DELETE SET NULL,
+  kategori_kode     TEXT REFERENCES public.kategori_layanan(kode) ON DELETE SET NULL,
   channel           TEXT NOT NULL DEFAULT 'whatsapp',
   keperluan         TEXT NOT NULL,
   detail            TEXT,

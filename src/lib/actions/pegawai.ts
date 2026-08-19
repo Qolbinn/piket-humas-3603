@@ -12,7 +12,7 @@ import { createPegawaiSchema, updatePegawaiSchema } from '@/lib/validations/pega
 import type { Pegawai } from '@/lib/types/database'
 
 // ---- HELPER: Cek role admin ----
-async function requireAdmin() {
+export async function requireAdmin() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Tidak terautentikasi.' }
