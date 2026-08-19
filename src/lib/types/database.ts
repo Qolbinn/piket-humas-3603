@@ -20,7 +20,8 @@ export type Pegawai = {
   name: string
   username: string
   email: string
-  phone: string | null
+  phone: string
+  lid_wa: string
   gender: Gender
   role: Role
   avatar_url: string | null
@@ -85,7 +86,8 @@ export type Database = {
           name: string
           username: string
           email: string
-          phone?: string | null
+          phone: string
+          lid_wa: string
           gender: Gender
           role?: Role
           avatar_url?: string | null
@@ -97,7 +99,8 @@ export type Database = {
           name?: string
           username?: string
           email?: string
-          phone?: string | null
+          phone?: string
+          lid_wa?: string
           gender?: Gender
           role?: Role
           avatar_url?: string | null

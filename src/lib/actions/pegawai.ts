@@ -6,6 +6,7 @@
 // ============================================================
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { createPegawaiSchema, updatePegawaiSchema } from '@/lib/validations/pegawai'
 import type { Pegawai } from '@/lib/types/database'
@@ -65,7 +66,8 @@ export async function createPegawai(formData: FormData) {
     name:     formData.get('name') as string,
     username: formData.get('username') as string,
     email:    formData.get('email') as string,
-    phone:    (formData.get('phone') as string) || undefined,
+    phone:    formData.get('phone') as string,
+    lid_wa:   formData.get('lid_wa') as string,
     password: formData.get('password') as string,
     gender:   formData.get('gender') as 'L' | 'P',
     role:     (formData.get('role') as string) || 'petugas',
@@ -77,11 +79,17 @@ export async function createPegawai(formData: FormData) {
     return { error: firstError }
   }
 
-  const { name, username, email, phone, password, gender, role } = parsed.data
+  const { name, username, email, phone, lid_wa, password, gender, role } = parsed.data
   const { supabase } = adminCheck
+  const adminClient = createAdminClient()
+
+  if (role === 'pimpinan') {
+    // Demote current pimpinan to petugas
+    await adminClient.from('pegawai').update({ role: 'petugas' }).eq('role', 'pimpinan')
+  }
 
   // 1. Buat auth user via admin API (butuh service role key)
-  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+  const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
@@ -99,14 +107,15 @@ export async function createPegawai(formData: FormData) {
       name,
       username,
       email,
-      phone: phone ?? null,
+      phone,
+      lid_wa,
       gender,
       role,
     } as any)) as any
 
   if (profileError) {
     // Rollback: hapus auth user jika profile gagal
-    await supabase.auth.admin.deleteUser(authData.user.id)
+    await adminClient.auth.admin.deleteUser(authData.user.id)
     return { error: profileError.message }
   }
 
@@ -122,9 +131,10 @@ export async function updatePegawai(id: string, formData: FormData) {
   const raw = {
     name:     formData.get('name') as string,
     username: formData.get('username') as string,
-    phone:    (formData.get('phone') as string) || undefined,
+    phone:    formData.get('phone') as string,
+    lid_wa:   formData.get('lid_wa') as string,
     gender:   formData.get('gender') as 'L' | 'P',
-    role:     formData.get('role') as 'admin' | 'petugas',
+    role:     formData.get('role') as 'admin' | 'pimpinan' | 'petugas',
   }
 
   const parsed = updatePegawaiSchema.safeParse(raw)
@@ -133,12 +143,28 @@ export async function updatePegawai(id: string, formData: FormData) {
     return { error: firstError }
   }
 
-  const { name, username, phone, gender, role } = parsed.data
-  const { supabase } = adminCheck
+  const { name, username, phone, lid_wa, gender, role } = parsed.data
+  const { supabase, userId } = adminCheck
+  const adminClient = createAdminClient()
+
+  // Anti self-demotion
+  if (userId === id && role !== 'admin') {
+    return { error: 'Anda tidak dapat menghilangkan akses admin dari akun Anda sendiri.' }
+  }
+
+  // Handle pimpinan swap
+  if (role === 'pimpinan') {
+    // Jika user ini BUKAN pimpinan sebelumnya, demote pimpinan lain
+    await adminClient
+      .from('pegawai')
+      .update({ role: 'petugas' })
+      .eq('role', 'pimpinan')
+      .neq('id', id) // jangan ubah diri sendiri jika memang sudah pimpinan
+  }
 
   const { error } = (await supabase
     .from('pegawai')
-    .update({ name, username, phone: phone ?? null, gender, role } as any)
+    .update({ name, username, phone, lid_wa, gender, role } as any)
     .eq('id', id)) as any
 
   if (error) return { error: error.message }
@@ -152,10 +178,16 @@ export async function deletePegawai(id: string) {
   const adminCheck = await requireAdmin()
   if ('error' in adminCheck) return adminCheck
 
-  const { supabase } = adminCheck
+  const { userId } = adminCheck
+
+  if (userId === id) {
+    return { error: 'Anda tidak dapat menghapus akun Anda sendiri.' }
+  }
+
+  const adminClient = createAdminClient()
 
   // Hapus auth user → cascade ke tabel pegawai via FK
-  const { error } = await supabase.auth.admin.deleteUser(id)
+  const { error } = await adminClient.auth.admin.deleteUser(id)
   if (error) return { error: error.message }
 
   revalidatePath('/pegawai')

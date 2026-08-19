@@ -1,9 +1,9 @@
-import Link from 'next/link'
-import { Plus, Users } from 'lucide-react'
+import { Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getPegawai } from '@/lib/actions/pegawai'
 import { getCurrentPegawai } from '@/lib/actions/auth'
-import PegawaiTable from '@/components/features/pegawai/PegawaiTable'
+import PegawaiTableClient from '@/components/features/pegawai/PegawaiTableClient'
+import CreatePegawaiDialog from '@/components/features/pegawai/CreatePegawaiDialog'
 
 export const metadata = {
   title: 'Data Pegawai — Piket Humas',
@@ -32,14 +32,7 @@ export default async function PegawaiPage() {
             Manajemen data pegawai humas dan hak akses sistem.
           </p>
         </div>
-        {isAdmin && (
-          <Button asChild className="w-full sm:w-auto shadow-md" id="tambah-pegawai-btn">
-            <Link href="/pegawai/tambah">
-              <Plus className="mr-2 h-4 w-4" />
-              Tambah Pegawai
-            </Link>
-          </Button>
-        )}
+        {isAdmin && <CreatePegawaiDialog />}
       </div>
 
       {/* Stats bar */}
@@ -63,20 +56,13 @@ export default async function PegawaiPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-card border rounded-2xl shadow-sm overflow-hidden">
-        <div className="p-4 border-b bg-muted/20 flex justify-between items-center">
-          <p className="text-sm font-medium text-muted-foreground">
-            Menampilkan {pegawaiList?.length ?? 0} pegawai
+      <div className="space-y-2">
+        {!isAdmin && (
+          <p className="text-xs text-muted-foreground italic px-1">
+            Hanya admin yang dapat mengelola data pegawai
           </p>
-          {!isAdmin && (
-            <span className="text-xs text-muted-foreground italic">
-              Hanya admin yang dapat mengelola data pegawai
-            </span>
-          )}
-        </div>
-        <div className="p-4">
-          <PegawaiTable pegawaiList={pegawaiList ?? []} isAdmin={isAdmin} />
-        </div>
+        )}
+        <PegawaiTableClient data={pegawaiList ?? []} isAdmin={isAdmin} />
       </div>
     </div>
   )
