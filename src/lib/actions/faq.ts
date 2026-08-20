@@ -50,6 +50,18 @@ export async function createFaqMenu(formData: FormData) {
   }
 
   const supabase = await createClient()
+
+  // Cek apakah kode sudah dipakai
+  const { data: existingKode } = await supabase
+    .from('faq_menu')
+    .select('id')
+    .eq('kode', parsed.data.kode)
+    .limit(1)
+
+  if (existingKode && existingKode.length > 0) {
+    return { error: `Gagal: Kode FAQ "${parsed.data.kode}" sudah digunakan.` }
+  }
+
   const { error } = await supabase
     .from('faq_menu')
     .insert({
@@ -91,6 +103,18 @@ export async function updateFaqMenu(id: string, formData: FormData) {
   }
 
   const supabase = await createClient()
+
+  // Cek apakah kode sudah dipakai oleh FAQ lain
+  const { data: existingKode } = await supabase
+    .from('faq_menu')
+    .select('id')
+    .eq('kode', parsed.data.kode)
+    .neq('id', id)
+    .limit(1)
+
+  if (existingKode && existingKode.length > 0) {
+    return { error: `Gagal: Kode FAQ "${parsed.data.kode}" sudah digunakan oleh FAQ lain.` }
+  }
 
   // Mencegah perubahan folder menjadi dokumen jika masih punya child
   if (!parsed.data.is_menu) {

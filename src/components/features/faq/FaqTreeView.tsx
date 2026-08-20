@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 import EditFaqDialog from './EditFaqDialog'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { parseWaMarkdown } from '@/lib/utils/wa-format'
 
 interface FaqTreeViewProps {
   faqs: FaqMenu[]
@@ -91,9 +92,10 @@ export default function FaqTreeView({ faqs }: FaqTreeViewProps) {
             </div>
           </div>
           <ScrollArea className="max-h-[60vh]">
-            <div className="p-6 text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-              {viewFaq?.content}
-            </div>
+            <div 
+              className="p-6 text-sm text-foreground leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: parseWaMarkdown(viewFaq?.content) }}
+            />
           </ScrollArea>
           <div className="p-4 border-t flex justify-end bg-muted/20">
             <Button onClick={() => setIsViewDialogOpen(false)} className="rounded-xl">Tutup</Button>

@@ -5,7 +5,7 @@
 CREATE TABLE IF NOT EXISTS public.faq_menu (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   parent_id  UUID REFERENCES public.faq_menu(id) ON DELETE CASCADE,
-  kode       TEXT,
+  kode       TEXT UNIQUE NOT NULL,
   title      TEXT NOT NULL,
   is_menu    BOOLEAN NOT NULL DEFAULT false,
   content    TEXT NOT NULL,
