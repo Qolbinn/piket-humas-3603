@@ -82,7 +82,7 @@ export async function assignJadwal(
 
   // 1. Ambil detail template
   const { data: details, error: detailError } = (await supabase
-    .from('template_detail')
+    .from('template_piket_detail')
     .select('day_of_week, pegawai_id')
     .eq('template_id', templateId)) as any
 
@@ -152,4 +152,42 @@ export async function deleteJadwal(id: string) {
 
   if (error) throw new Error(error.message)
   revalidatePath('/piket')
+}
+
+// ---- GET TODAY SCHEDULE (For Checklist) ----
+export async function getTodaySchedule() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  // Waktu lokal atau padStart manual bisa bermasalah zona waktu, mari amankan dengan Date biasa
+  const d = new Date()
+  const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+  const { data, error } = await supabase
+    .from('jadwal_piket')
+    .select('*')
+    .eq('pegawai_id', user.id)
+    .eq('tanggal', todayStr)
+    .single()
+    
+  if (error) return null
+  return data
+}
+
+// ---- CONFIRM PRESENCE ----
+export async function confirmPresence(jadwalId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthenticated')
+
+  const { error } = await supabase
+    .from('jadwal_piket')
+    .update({ is_hadir: true, hadir_at: new Date().toISOString() })
+    .eq('id', jadwalId)
+    .eq('pegawai_id', user.id)
+
+  if (error) return { error: error.message }
+  revalidatePath('/dashboard')
+  return { success: true }
 }

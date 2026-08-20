@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, MessageSquare, Clock, LayoutDashboard } from "lucide-react";
-import { getJadwalByRange } from "@/lib/actions/jadwal";
+import { getJadwalByRange, getTodaySchedule } from "@/lib/actions/jadwal";
+import PresenceChecklist from "@/components/features/monitoring/presence-checklist";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -10,8 +11,10 @@ import { MyScheduleCard } from "@/components/dashboard/my-schedule-card";
 export default async function DashboardPage() {
   const todayStr = format(new Date(), "yyyy-MM-dd");
   let officersToday: any[] = [];
+  let myTodaySchedule: any = null;
   try {
     officersToday = await getJadwalByRange(todayStr, todayStr);
+    myTodaySchedule = await getTodaySchedule();
   } catch (err) {
     console.error("Gagal mengambil jadwal hari ini:", err);
   }
@@ -21,6 +24,14 @@ export default async function DashboardPage() {
         <h1 className="text-3xl font-bold tracking-tight text-primary">Dashboard</h1>
         <p className="text-muted-foreground text-lg">Ringkasan aktivitas chatbot dan piket humas hari ini.</p>
       </div>
+
+      {myTodaySchedule && (
+        <PresenceChecklist 
+          jadwalId={myTodaySchedule.id} 
+          isHadir={myTodaySchedule.is_hadir} 
+          hadirAt={myTodaySchedule.hadir_at} 
+        />
+      )}
 
       <div className="grid gap-6 md:grid-cols-3">
         <Card className="border-none shadow-md bg-gradient-to-br from-primary/10 via-background to-background relative overflow-hidden">

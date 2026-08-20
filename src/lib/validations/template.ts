@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const templateDetailSchema = z.object({
   day_of_week: z.number().min(1).max(5),
-  pegawai_id: z.string().uuid('ID Pegawai tidak valid'),
+  pegawai_id: z.string().min(1, 'ID Pegawai tidak valid'),
 })
 
 export const templateSchema = z.object({

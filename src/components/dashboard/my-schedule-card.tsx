@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { format, addMonths, subMonths, differenceInCalendarDays } from "date-fns";
 import { id } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -110,7 +110,22 @@ export function MyScheduleCard() {
                       <span className="text-sm font-semibold text-foreground">
                         {format(new Date(item.tanggal), "EEEE, d MMMM yyyy", { locale: id })}
                       </span>
-                      <div className="flex justify-end items-center">
+                      <div className="flex justify-between items-center mt-1">
+                        <div>
+                          {differenceInCalendarDays(new Date(item.tanggal), new Date()) <= 0 && (
+                            <div className="flex items-center gap-1.5">
+                              {item.is_hadir ? (
+                                <span className="flex items-center text-xs text-green-600 bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-full font-medium border border-green-200 dark:border-green-800">
+                                  <CheckCircle2 className="w-3 h-3 mr-1" /> Absen
+                                </span>
+                              ) : (
+                                <span className="flex items-center text-xs text-red-600 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-full font-medium border border-red-200 dark:border-red-800">
+                                  <XCircle className="w-3 h-3 mr-1" /> Absen
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
                         <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${className}`}>
                           {text}
                         </span>

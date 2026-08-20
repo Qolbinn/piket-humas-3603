@@ -121,3 +121,8 @@ INSERT INTO public.faq_menu (id, parent_id, kode, title, is_menu, content) VALUE
   ('f3c3c3c3-3c3c-3c3c-3c3c-3c3c3c3c3c3c', 'f3333333-3333-3333-3333-333333333333', '3C', 'Data Kependudukan', false, 'Jumlah Penduduk Banten hasil Sensus Penduduk 2020 adalah 11,90 juta jiwa.'),
   ('f4a4a4a4-4a4a-4a4a-4a4a-4a4a4a4a4a4a', 'f4444444-4444-4444-4444-444444444444', '4A', 'Apa itu IPM?', false, 'IPM mengukur capaian pembangunan manusia berbasis sejumlah komponen dasar kualitas hidup.'),
   ('f4b4b4b4-4b4b-4b4b-4b4b-4b4b4b4b4b4b', 'f4444444-4444-4444-4444-444444444444', '4B', 'Definisi Pengangguran', false, 'Pengangguran adalah penduduk yang tidak bekerja namun sedang mencari pekerjaan atau mempersiapkan usaha baru.');
+
+-- ============================================================
+-- SECTION 6: BOT STATUS
+-- ============================================================
+INSERT INTO public.bot_status (service_name, last_ping_at, status) VALUES ('whatsapp-bot', now(), 'ACTIVE') ON CONFLICT (service_name) DO NOTHING;
