@@ -1,6 +1,7 @@
 import { JadwalTab } from "@/components/piket/jadwal-tab";
 import { getJadwalByRange } from "@/lib/actions/jadwal";
 import { getTemplates } from "@/lib/actions/template";
+import { getPegawai } from "@/lib/actions/pegawai";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 
 export default async function JadwalPage() {
@@ -17,13 +18,14 @@ export default async function JadwalPage() {
   const adjustedEnd = new Date(monthEnd);
   adjustedEnd.setDate(monthEnd.getDate() + (endDay === 0 ? 7 - endDay : 7 - endDay));
 
-  const [jadwalInitial, templates] = await Promise.all([
+  const [jadwalInitial, templates, pegawais] = await Promise.all([
     getJadwalByRange(
       format(adjustedStart, "yyyy-MM-dd"), 
       format(adjustedEnd, "yyyy-MM-dd")
     ),
-    getTemplates()
+    getTemplates(),
+    getPegawai()
   ]);
 
-  return <JadwalTab initialData={jadwalInitial} templates={templates} />;
+  return <JadwalTab initialData={jadwalInitial} templates={templates} pegawais={pegawais} />;
 }

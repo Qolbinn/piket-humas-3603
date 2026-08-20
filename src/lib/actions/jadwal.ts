@@ -137,8 +137,40 @@ export async function assignJadwal(
 
   if (error) throw new Error(error.message)
 
-  revalidatePath('/dashboard/jadwal')
+  revalidatePath('/piket/jadwal')
   return { success: true, count: rows.length }
+}
+
+// ---- UPDATE JADWAL HARIAN (Manual Edit) ----
+export async function updateJadwalHarian(tanggal: string, pegawaiIds: string[]) {
+  const { supabase } = await requireAdmin()
+
+  // 1. Hapus semua jadwal pada tanggal tersebut
+  const { error: deleteError } = await supabase
+    .from('jadwal_piket')
+    .delete()
+    .eq('tanggal', tanggal)
+
+  if (deleteError) throw new Error(deleteError.message)
+
+  // 2. Jika ada pegawai yang di-assign, insert jadwal baru
+  if (pegawaiIds.length > 0) {
+    const rows = pegawaiIds.map(id => ({
+      tanggal,
+      pegawai_id: id,
+      // Karena ini edit manual, template_id dibiarkan null atau diabaikan,
+      // struktur database kita memperbolehkan template_id null.
+    }))
+
+    const { error: insertError } = await supabase
+      .from('jadwal_piket')
+      .insert(rows)
+
+    if (insertError) throw new Error(insertError.message)
+  }
+
+  revalidatePath('/piket/jadwal')
+  return { success: true }
 }
 
 // ---- DELETE JADWAL ----

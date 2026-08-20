@@ -3,23 +3,25 @@
 import { useState, useEffect, useTransition } from "react";
 import { format, addMonths, subMonths, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, startOfWeek, endOfWeek, isSameDay, eachWeekOfInterval } from "date-fns";
 import { id } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Loader2, Users, CalendarCheck, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Loader2, Users, CalendarCheck, CheckCircle2, Pencil, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { getJadwalByRange, assignJadwal } from "@/lib/actions/jadwal";
+import { getJadwalByRange, assignJadwal, updateJadwalHarian } from "@/lib/actions/jadwal";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 interface JadwalTabProps {
   initialData: any[];
   templates: any[];
+  pegawais: any[];
 }
 
-export function JadwalTab({ initialData, templates }: JadwalTabProps) {
+export function JadwalTab({ initialData, templates, pegawais }: JadwalTabProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -139,6 +141,49 @@ export function JadwalTab({ initialData, templates }: JadwalTabProps) {
     });
   };
 
+  // --- EDIT HARIAN LOGIC ---
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editDate, setEditDate] = useState<Date | null>(null);
+  const [editPegawaiIds, setEditPegawaiIds] = useState<string[]>([]);
+  const [searchPegawai, setSearchPegawai] = useState("");
+
+  const openEditDialog = (date: Date) => {
+    const currentSchedule = getScheduleForDay(date);
+    setEditPegawaiIds(currentSchedule.map((s: any) => s.pegawai_id));
+    setEditDate(date);
+    setSearchPegawai("");
+    setEditDialogOpen(true);
+  };
+
+  const toggleEditPegawai = (pegawaiId: string) => {
+    setEditPegawaiIds(prev => 
+      prev.includes(pegawaiId) ? prev.filter(id => id !== pegawaiId) : [...prev, pegawaiId]
+    );
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editDate) return;
+
+    startTransition(async () => {
+      try {
+        const dateStr = format(editDate, "yyyy-MM-dd");
+        await updateJadwalHarian(dateStr, editPegawaiIds);
+        
+        toast.success("Jadwal harian berhasil diperbarui!");
+        setEditDialogOpen(false);
+        router.refresh();
+        
+        const data = await getJadwalByRange(
+          format(adjustedStart, "yyyy-MM-dd"),
+          format(adjustedEnd, "yyyy-MM-dd")
+        );
+        setJadwal(data);
+      } catch (err: any) {
+        toast.error(err.message);
+      }
+    });
+  };
+
   // --- DESKTOP LOGIC (MONTH) ---
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
@@ -182,7 +227,7 @@ export function JadwalTab({ initialData, templates }: JadwalTabProps) {
             Assign Petugas
           </Button>
           <Button variant="outline" onClick={goToToday} className="rounded-lg">
-            Hari Ini
+            Bulan Ini
           </Button>
           <div className="flex items-center rounded-lg border overflow-hidden shadow-sm">
             <Button variant="ghost" size="icon" onClick={prevMonth} className="rounded-none border-r hover:bg-muted">
@@ -219,7 +264,7 @@ export function JadwalTab({ initialData, templates }: JadwalTabProps) {
             Assign Petugas
           </Button>
           <Button variant="outline" size="sm" onClick={goToToday} className="flex-1 rounded-lg">
-            Hari Ini
+            Bulan Ini
           </Button>
           <div className="flex items-center rounded-lg border overflow-hidden shadow-sm flex-1">
             <Button variant="ghost" onClick={prevWeek} className="flex-1 rounded-none border-r hover:bg-muted">
@@ -266,11 +311,23 @@ export function JadwalTab({ initialData, templates }: JadwalTabProps) {
                 <div className="flex justify-between items-start">
                   <span className={cn(
                     "text-sm font-semibold w-8 h-8 flex items-center justify-center rounded-full transition-all",
-                    isTodayDate ? "bg-primary text-primary-foreground shadow-md scale-110" : "",
-                    !isCurrentMonth && !isTodayDate ? "opacity-50" : "text-foreground group-hover:text-primary"
+                    isTodayDate ? "bg-primary text-primary-foreground shadow-md scale-110" : "text-foreground group-hover:text-primary",
+                    !isCurrentMonth && !isTodayDate ? "opacity-50" : ""
                   )}>
                     {format(day, "d")}
                   </span>
+                  
+                  {isCurrentMonth && (
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-6 w-6 absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-primary hover:text-primary-foreground"
+                      onClick={() => openEditDialog(day)}
+                      title="Edit jadwal hari ini"
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-1.5 overflow-y-auto no-scrollbar">
@@ -327,11 +384,16 @@ export function JadwalTab({ initialData, templates }: JadwalTabProps) {
                     {weekDaysLabels[idx]}
                   </span>
                 </div>
-                <div className={cn(
-                  "px-3 py-1 text-sm font-bold rounded-full",
-                  isTodayDate ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
-                )}>
-                  {format(day, "d MMM", { locale: id })}
+                <div className="flex items-center gap-2">
+                  <div className={cn(
+                    "px-3 py-1 text-sm font-bold rounded-full",
+                    isTodayDate ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                  )}>
+                    {format(day, "d MMM", { locale: id })}
+                  </div>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-primary/10 hover:text-primary" onClick={() => openEditDialog(day)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
 
@@ -444,6 +506,79 @@ export function JadwalTab({ initialData, templates }: JadwalTabProps) {
                 <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memproses...</>
               ) : (
                 <><Users className="mr-2 h-4 w-4" /> Terapkan ({Object.values(weekSelections).filter(v => v !== "none").length} Minggu)</>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* EDIT HARIAN DIALOG */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle>Edit Petugas Harian</DialogTitle>
+            <DialogDescription>
+              {editDate ? format(editDate, "EEEE, d MMMM yyyy", { locale: id }) : ""}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <Label className="mb-3 block">Daftar Pegawai</Label>
+            
+            <div className="relative mb-3">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Cari nama petugas..."
+                className="pl-9 h-9"
+                value={searchPegawai}
+                onChange={(e) => setSearchPegawai(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2 border rounded-xl p-2 bg-muted/10 max-h-[250px] overflow-y-auto no-scrollbar">
+              {pegawais
+                .filter(p => p.name.toLowerCase().includes(searchPegawai.toLowerCase()))
+                .map((pegawai) => {
+                const isChecked = editPegawaiIds.includes(pegawai.id);
+                return (
+                  <label
+                    key={pegawai.id}
+                    className={cn(
+                      "flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all hover:border-primary/50",
+                      isChecked ? "bg-primary/5 border-primary shadow-sm" : "bg-background border-muted"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Checkbox
+                        checked={isChecked}
+                        onCheckedChange={() => toggleEditPegawai(pegawai.id)}
+                        className={isChecked ? "border-primary bg-primary text-primary-foreground" : ""}
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className={cn("w-2 h-2 rounded-full", pegawai.gender === 'L' ? "bg-blue-500" : "bg-pink-500")} />
+                        <span className={cn("text-sm font-medium", isChecked ? "text-primary" : "text-foreground")}>{pegawai.name}</span>
+                      </div>
+                    </div>
+                    {isChecked && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                  </label>
+                );
+              })}
+              
+              {pegawais.filter(p => p.name.toLowerCase().includes(searchPegawai.toLowerCase())).length === 0 && (
+                <div className="py-8 text-center text-sm text-muted-foreground">
+                  Petugas tidak ditemukan.
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={isPending}>Batal</Button>
+            <Button onClick={handleSaveEdit} disabled={isPending}>
+              {isPending ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Menyimpan...</>
+              ) : (
+                "Simpan Perubahan"
               )}
             </Button>
           </DialogFooter>

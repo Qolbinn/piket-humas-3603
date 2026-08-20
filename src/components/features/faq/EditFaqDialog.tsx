@@ -38,7 +38,7 @@ import { toast } from 'sonner'
 import WaToolbar from './WaToolbar'
 import { parseWaMarkdown } from '@/lib/utils/wa-format'
 
-type FormValues = z.infer<typeof faqMenuSchema>
+type FormValues = z.input<typeof faqMenuSchema>
 
 interface EditFaqDialogProps {
   faq: FaqMenu | null
@@ -107,7 +107,7 @@ export default function EditFaqDialog({ faq, faqs, open, onOpenChange }: EditFaq
       formData.append('is_active', String(data.is_active))
 
       const result = await updateFaqMenu(faq.id, formData)
-      if (result.error) {
+      if ('error' in result && result.error) {
         toast.error(result.error)
       } else {
         toast.success('FAQ berhasil diperbarui!')
@@ -121,7 +121,7 @@ export default function EditFaqDialog({ faq, faqs, open, onOpenChange }: EditFaq
     
     startTransition(async () => {
       const res = await deleteFaqMenu(faq.id)
-      if (res?.error) {
+      if (res && 'error' in res && res.error) {
         toast.error(res.error)
         setIsAlertOpen(false)
       } else {
