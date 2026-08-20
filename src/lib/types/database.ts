@@ -38,6 +38,19 @@ export type KategoriLayanan = {
   updated_at: string
 }
 
+export type FaqMenu = {
+  id: string
+  parent_id: string | null
+  kode: string | null
+  title: string
+  is_menu: boolean
+  content: string
+  urutan: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 export type Template = {
   id: string
   name: string
@@ -138,6 +151,42 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      faq_menu: {
+        Row: FaqMenu
+        Insert: {
+          id?: string
+          parent_id?: string | null
+          kode?: string | null
+          title: string
+          is_menu?: boolean
+          content: string
+          urutan?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          parent_id?: string | null
+          kode?: string | null
+          title?: string
+          is_menu?: boolean
+          content?: string
+          urutan?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "faq_menu_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "faq_menu"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       template: {
         Row: Template

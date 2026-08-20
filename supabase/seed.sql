@@ -104,3 +104,20 @@ ON CONFLICT (nama) DO NOTHING;
 -- ============================================================
 -- Kita biarkan kosong dulu karena sisa user sedikit, 
 -- UI Web App nanti yang akan dipakai untuk membuat template.
+
+-- ============================================================
+-- SECTION 5: FAQ MENU
+-- ============================================================
+INSERT INTO public.faq_menu (id, parent_id, kode, title, is_menu, content) VALUES
+  ('f1111111-1111-1111-1111-111111111111', NULL, '1', 'Informasi Jam Buka Kantor', false, 'Kantor BPS buka hari Senin - Jumat pukul 08:00 - 16:00 WIB.'),
+  ('f2222222-2222-2222-2222-222222222222', NULL, '2', 'Jadwal Sensus', false, 'Sensus Penduduk selanjutnya akan dilaksanakan pada tahun 2030. Untuk survei rutin tahun ini, silakan hubungi pihak kantor.'),
+  ('f3333333-3333-3333-3333-333333333333', NULL, '3', 'Data Indikator', true, 'Pilih informasi Data Indikator yang Anda butuhkan:'),
+  ('f4444444-4444-4444-4444-444444444444', NULL, '4', 'Konsep dan Definisi', true, 'Pilih menu Konsep dan Definisi yang ingin Anda baca:'),
+  ('f9999999-9999-9999-9999-999999999999', NULL, '99', 'Layanan Lainnya / Eskalasi ke Petugas', false, 'TRIGGER_ESCALATION');
+
+INSERT INTO public.faq_menu (id, parent_id, kode, title, is_menu, content) VALUES
+  ('f3a3a3a3-3a3a-3a3a-3a3a-3a3a3a3a3a3a', 'f3333333-3333-3333-3333-333333333333', '3A', 'Data IPM', false, 'Indeks Pembangunan Manusia (IPM) Banten tahun 2023 adalah 73.32.'),
+  ('f3b3b3b3-3b3b-3b3b-3b3b-3b3b3b3b3b3b', 'f3333333-3333-3333-3333-333333333333', '3B', 'Data Ketenagakerjaan', false, 'Tingkat Pengangguran Terbuka (TPT) Banten per Agustus 2023 sebesar 7.52%.'),
+  ('f3c3c3c3-3c3c-3c3c-3c3c-3c3c3c3c3c3c', 'f3333333-3333-3333-3333-333333333333', '3C', 'Data Kependudukan', false, 'Jumlah Penduduk Banten hasil Sensus Penduduk 2020 adalah 11,90 juta jiwa.'),
+  ('f4a4a4a4-4a4a-4a4a-4a4a-4a4a4a4a4a4a', 'f4444444-4444-4444-4444-444444444444', '4A', 'Apa itu IPM?', false, 'IPM mengukur capaian pembangunan manusia berbasis sejumlah komponen dasar kualitas hidup.'),
+  ('f4b4b4b4-4b4b-4b4b-4b4b-4b4b4b4b4b4b', 'f4444444-4444-4444-4444-444444444444', '4B', 'Definisi Pengangguran', false, 'Pengangguran adalah penduduk yang tidak bekerja namun sedang mencari pekerjaan atau mempersiapkan usaha baru.');
