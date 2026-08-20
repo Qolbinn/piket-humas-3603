@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { createTemplate, updateTemplate } from '@/lib/actions/template'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -30,15 +30,15 @@ export function TemplateForm({ initialData, pegawais, onSuccess, onCancel }: Tem
   // Transform initialData to match form values
   const defaultValues: Partial<TemplateFormValues> = {
     name: initialData?.name || '',
-    details: initialData?.template_detail 
-      ? initialData.template_detail.map((d: any) => ({
+    details: initialData?.template_piket_detail 
+      ? initialData.template_piket_detail.map((d: any) => ({
           day_of_week: d.day_of_week,
           pegawai_id: d.pegawai?.id || d.pegawai_id
         }))
       : []
   }
 
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<TemplateFormValues>({
+  const { register, watch, setValue, setError, clearErrors, formState: { errors } } = useForm<TemplateFormValues>({
     resolver: zodResolver(templateSchema as any),
     defaultValues
   })
@@ -49,7 +49,7 @@ export function TemplateForm({ initialData, pegawais, onSuccess, onCancel }: Tem
     const exists = currentDetails.find(d => d.day_of_week === day && d.pegawai_id === pegawaiId)
 
     if (exists) {
-      setValue('details', currentDetails.filter(d => !(d.day_of_week === day && d.pegawai_id === pegawaiId)))
+      setValue('details', currentDetails.filter(d => !(d.day_of_week === day && d.pegawai_id === pegawaiId)), { shouldValidate: true })
     } else {
       // Check if already 3 pegawais for this day
       const count = currentDetails.filter(d => d.day_of_week === day).length
@@ -57,18 +57,39 @@ export function TemplateForm({ initialData, pegawais, onSuccess, onCancel }: Tem
         toast.error('Maksimal 3 petugas per hari')
         return
       }
-      setValue('details', [...currentDetails, { day_of_week: day, pegawai_id: pegawaiId }])
+      setValue('details', [...currentDetails, { day_of_week: day, pegawai_id: pegawaiId }], { shouldValidate: true })
     }
   }
 
-  const onSubmit = async (data: TemplateFormValues) => {
+  const handleManualSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    clearErrors()
+    
+    const formData = {
+      name: watch('name'),
+      details: watch('details') || []
+    }
+
+    const parsed = templateSchema.safeParse(formData)
+    
+    if (!parsed.success) {
+      console.error("Form Validation Errors:", parsed.error)
+      parsed.error.issues.forEach(err => {
+        if (err.path.length > 0) {
+          setError(err.path[0] as keyof TemplateFormValues, { type: 'manual', message: err.message })
+        }
+      })
+      toast.error("Cek kembali isian formulir Anda")
+      return
+    }
+
     startTransition(async () => {
       try {
         if (initialData?.id) {
-          await updateTemplate(initialData.id, data)
+          await updateTemplate(initialData.id, parsed.data)
           toast.success('Template berhasil diperbarui')
         } else {
-          await createTemplate(data)
+          await createTemplate(parsed.data)
           toast.success('Template berhasil dibuat')
         }
         if (onSuccess) onSuccess()
@@ -88,7 +109,7 @@ export function TemplateForm({ initialData, pegawais, onSuccess, onCancel }: Tem
   ]
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleManualSubmit} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="name">Nama Template</Label>
         <Input

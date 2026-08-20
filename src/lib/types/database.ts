@@ -73,6 +73,8 @@ export type JadwalPiket = {
   tanggal: string
   pegawai_id: string
   template_id: string | null
+  is_hadir: boolean
+  hadir_at: string | null
   created_at: string
   pegawai?: Pegawai
   template?: Template
@@ -97,6 +99,15 @@ export type RiwayatPelanggan = {
   id: number
   nomor_hp: string
   created_at: string
+}
+
+export type BotStatus = {
+  id: number
+  service_name: string
+  status: string
+  last_ping_at: string
+  created_at: string
+  updated_at: string
 }
 
 export type Database = {
@@ -188,7 +199,7 @@ export type Database = {
           }
         ]
       }
-      template: {
+      template_piket: {
         Row: Template
         Insert: {
           id?: string
@@ -204,7 +215,7 @@ export type Database = {
         }
         Relationships: []
       }
-      template_detail: {
+      template_piket_detail: {
         Row: TemplateDetail
         Insert: {
           id?: string
@@ -229,6 +240,8 @@ export type Database = {
           tanggal: string
           pegawai_id: string
           template_id?: string | null
+          is_hadir?: boolean
+          hadir_at?: string | null
           created_at?: string
         }
         Update: {
@@ -236,6 +249,8 @@ export type Database = {
           tanggal?: string
           pegawai_id?: string
           template_id?: string | null
+          is_hadir?: boolean
+          hadir_at?: string | null
           created_at?: string
         }
         Relationships: []
@@ -281,6 +296,26 @@ export type Database = {
           id?: number
           nomor_hp?: string
           created_at?: string
+        }
+        Relationships: []
+      }
+      bot_status: {
+        Row: BotStatus
+        Insert: {
+          id?: number
+          service_name: string
+          status: string
+          last_ping_at: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          service_name?: string
+          status?: string
+          last_ping_at?: string
+          created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }

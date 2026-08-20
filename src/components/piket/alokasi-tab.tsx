@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -28,20 +29,19 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
   const [isPending, startTransition] = useTransition();
   const currentYear = new Date().getFullYear();
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState<string>(String(currentYear));
   const [selectedMonth, setSelectedMonth] = useState<string>(String(new Date().getMonth() + 1));
-  const [selectedWeeks, setSelectedWeeks] = useState<{start: string, end: string}[]>([]);
+  const [weekSelections, setWeekSelections] = useState<Record<string, string>>({}); // { [weekStart]: templateId }
+  const [bulkTemplateId, setBulkTemplateId] = useState<string>("none");
   const [searchQuery, setSearchQuery] = useState("");
   
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<any>(null);
+  const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
 
   const filteredTemplates = templates.filter(t => 
     t.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const activeTemplateForAssign = templates.find(t => t.id === selectedTemplateId);
 
   // Assignment Logic
   const targetDate = new Date(parseInt(selectedYear), parseInt(selectedMonth) - 1, 1);
@@ -74,51 +74,68 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
     };
   }).filter(w => w.isValid);
 
-  const toggleWeek = (week: {start: string, end: string}) => {
-    setSelectedWeeks(prev =>
-      prev.some(w => w.start === week.start) 
-        ? prev.filter(w => w.start !== week.start) 
-        : [...prev, week]
-    );
-  };
-
-  const toggleAllWeeks = () => {
-    if (selectedWeeks.length === weeks.length) {
-      setSelectedWeeks([]);
-    } else {
-      setSelectedWeeks(weeks.map(w => ({ start: w.start, end: w.end })));
+  const applyToAll = (templateId: string, customWeeks = weeks) => {
+    setBulkTemplateId(templateId);
+    if (templateId === "none") {
+      setWeekSelections({});
+      return;
     }
+    const newSelections: Record<string, string> = {};
+    customWeeks.forEach(w => {
+      newSelections[w.start] = templateId;
+    });
+    setWeekSelections(newSelections);
   };
 
   const handleYearChange = (year: string) => {
     setSelectedYear(year);
-    setSelectedWeeks([]);
+    setWeekSelections({});
+    setBulkTemplateId("none");
   };
 
   const handleMonthChange = (month: string) => {
     setSelectedMonth(month);
-    setSelectedWeeks([]);
+    setWeekSelections({});
+    setBulkTemplateId("none");
   };
 
   const openAssignDialog = (templateId: string) => {
-    setSelectedTemplateId(templateId);
-    setSelectedYear(String(new Date().getFullYear()));
-    setSelectedMonth(String(new Date().getMonth() + 1));
-    setSelectedWeeks([]);
+    const curYear = String(new Date().getFullYear());
+    const curMonth = String(new Date().getMonth() + 1);
+    setSelectedYear(curYear);
+    setSelectedMonth(curMonth);
+    
+    // Calculate weeks for the current month to pre-fill
+    const target = new Date(parseInt(curYear), parseInt(curMonth) - 1, 1);
+    const mStart = startOfMonth(target);
+    const mEnd = endOfMonth(mStart);
+    const tempWeeks = eachWeekOfInterval({ start: mStart, end: mEnd }, { weekStartsOn: 1 }).map(w => {
+       const wStart = startOfWeek(w, { weekStartsOn: 1 });
+       const displayStart = wStart < mStart ? mStart : wStart;
+       return { start: format(displayStart, "yyyy-MM-dd") };
+    });
+
+    const initialSelections: Record<string, string> = {};
+    tempWeeks.forEach(w => initialSelections[w.start] = templateId);
+    setWeekSelections(initialSelections);
+    setBulkTemplateId(templateId);
+    
     setAssignDialogOpen(true);
   };
 
   const handleAssign = async () => {
-    if (!selectedTemplateId || selectedWeeks.length === 0) return;
+    const weeksToAssign = weeks.filter(w => weekSelections[w.start] && weekSelections[w.start] !== "none");
+    if (weeksToAssign.length === 0) return;
 
     startTransition(async () => {
       try {
         let totalCount = 0;
-        for (const week of selectedWeeks) {
-          const res = await assignJadwal(selectedTemplateId, week.start, week.end);
+        for (const week of weeksToAssign) {
+          const templateId = weekSelections[week.start];
+          const res = await assignJadwal(templateId, week.start, week.end);
           if (res.success) totalCount += res.count || 0;
         }
-        toast.success(`Berhasil menerapkan template ke ${selectedWeeks.length} minggu (${totalCount} baris jadwal)`);
+        toast.success(`Berhasil menerapkan template ke ${weeksToAssign.length} minggu (${totalCount} baris jadwal)`);
         setAssignDialogOpen(false);
         router.refresh();
       } catch (err: any) {
@@ -127,16 +144,18 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
     });
   };
 
-  const handleDeleteTemplate = async (id: string) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus template ini?")) return;
+  const confirmDeleteTemplate = async () => {
+    if (!templateToDelete) return;
     
     startTransition(async () => {
       try {
-        await deleteTemplate(id);
+        await deleteTemplate(templateToDelete);
         toast.success("Template berhasil dihapus");
+        setTemplateToDelete(null);
         router.refresh();
       } catch (err: any) {
         toast.error(err.message);
+        setTemplateToDelete(null);
       }
     });
   };
@@ -197,7 +216,7 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
                   variant="ghost" 
                   size="icon" 
                   className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                  onClick={() => handleDeleteTemplate(tpl.id)}
+                  onClick={() => setTemplateToDelete(tpl.id)}
                   disabled={isPending}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -208,7 +227,7 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
               <div className="grid grid-cols-1 sm:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x">
                 {[1, 2, 3, 4, 5].map((dayNum) => {
                   const dayName = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"][dayNum - 1];
-                  const details = tpl.template_detail.filter((d: any) => d.day_of_week === dayNum);
+                  const details = tpl.template_piket_detail.filter((d: any) => d.day_of_week === dayNum);
                   
                   return (
                     <div key={dayNum} className="p-3 bg-card hover:bg-muted/10 transition-colors">
@@ -258,7 +277,7 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
           <DialogHeader>
             <DialogTitle>Assign Template ke Kalender</DialogTitle>
             <DialogDescription>
-              Terapkan <b>{activeTemplateForAssign?.name}</b> ke minggu pilihan Anda.
+              Tentukan template alokasi untuk setiap minggu di bulan <b>{format(targetDate, "MMMM yyyy", { locale: id })}</b>.
             </DialogDescription>
           </DialogHeader>
 
@@ -301,38 +320,60 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
               </div>
             </div>
 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label>Pilih Minggu (Senin - Jumat)</Label>
-                <Button variant="ghost" size="sm" onClick={toggleAllWeeks} className="text-xs h-7 px-2">
-                  {selectedWeeks.length === weeks.length ? "Batal Pilih Semua" : "Pilih Semua"}
-                </Button>
-              </div>
+            <div className="space-y-3 bg-muted/20 p-4 rounded-xl border">
+              <Label className="text-primary font-semibold">Setel Serentak (Jalan Pintas)</Label>
+              <Select value={bulkTemplateId} onValueChange={(val) => applyToAll(val, weeks)}>
+                <SelectTrigger className="bg-background">
+                  <SelectValue placeholder="Pilih template untuk mengisi semua minggu..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none" className="text-muted-foreground italic">-- Kosongkan Semua --</SelectItem>
+                  {templates.map(t => (
+                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                  ))}
+                  {templates.length === 0 && (
+                    <SelectItem value="empty" disabled>Belum ada template</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">Opsi ini akan mengubah semua pilihan di bawah secara otomatis.</p>
+            </div>
 
-              <div className="space-y-2 border rounded-xl p-2 bg-muted/10 max-h-[250px] overflow-y-auto">
+            <div className="space-y-3">
+              <Label>Daftar Minggu (Senin - Jumat)</Label>
+
+              <div className="space-y-2 border rounded-xl p-2 bg-muted/10 max-h-[250px] overflow-y-auto no-scrollbar">
                 {weeks.map((week) => {
-                  const isChecked = selectedWeeks.some(w => w.start === week.start);
+                  const selectedVal = weekSelections[week.start] || "none";
+                  const hasSelection = selectedVal !== "none";
                   return (
-                    <label
+                    <div
                       key={week.id}
                       className={cn(
-                        "flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all hover:border-primary/50",
-                        isChecked ? "bg-primary/5 border-primary shadow-sm" : "bg-background border-muted"
+                        "flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border transition-all gap-3",
+                        hasSelection ? "bg-primary/5 border-primary/40 shadow-sm" : "bg-background border-muted hover:border-border"
                       )}
                     >
-                      <div className="flex items-center gap-3">
-                        <Checkbox
-                          checked={isChecked}
-                          onCheckedChange={() => toggleWeek({start: week.start, end: week.end})}
-                          className={isChecked ? "border-primary bg-primary text-primary-foreground" : ""}
-                        />
-                        <div className="flex flex-col">
-                          <span className={cn("text-sm font-medium", isChecked ? "text-primary" : "text-foreground")}>{week.label}</span>
-                          <span className="text-xs text-muted-foreground">{week.displayRange}</span>
-                        </div>
+                      <div className="flex flex-col">
+                        <span className={cn("text-sm font-medium", hasSelection ? "text-primary" : "text-foreground")}>{week.label}</span>
+                        <span className="text-xs text-muted-foreground">{week.displayRange}</span>
                       </div>
-                      {isChecked && <CheckCircle2 className="h-4 w-4 text-primary" />}
-                    </label>
+                      
+                      <Select 
+                        value={selectedVal} 
+                        onValueChange={(val) => setWeekSelections(prev => ({...prev, [week.start]: val}))}
+                      >
+                        <SelectTrigger className={cn("w-full sm:w-[180px] h-8 text-xs", !hasSelection && "text-muted-foreground")}>
+                          <SelectValue placeholder="Lewati" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none" className="text-muted-foreground italic">-- Lewati --</SelectItem>
+                          {templates.map(t => (
+                            <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   );
                 })}
               </div>
@@ -341,11 +382,11 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setAssignDialogOpen(false)} disabled={isPending}>Batal</Button>
-            <Button disabled={selectedWeeks.length === 0 || isPending} onClick={handleAssign}>
+            <Button disabled={Object.values(weekSelections).filter(v => v !== "none").length === 0 || isPending} onClick={handleAssign}>
               {isPending ? (
                 <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memproses...</>
               ) : (
-                <><Users className="mr-2 h-4 w-4" /> Terapkan ({selectedWeeks.length} Minggu)</>
+                <><Users className="mr-2 h-4 w-4" /> Terapkan ({Object.values(weekSelections).filter(v => v !== "none").length} Minggu)</>
               )}
             </Button>
           </DialogFooter>
@@ -371,6 +412,35 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Alert */}
+      <AlertDialog open={!!templateToDelete} onOpenChange={(open) => !open && setTemplateToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tindakan ini tidak dapat dibatalkan. Template alokasi ini akan dihapus secara permanen.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isPending}>Batal</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={(e) => {
+                e.preventDefault();
+                confirmDeleteTemplate();
+              }}
+              disabled={isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isPending ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Menghapus...</>
+              ) : (
+                "Hapus Template"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

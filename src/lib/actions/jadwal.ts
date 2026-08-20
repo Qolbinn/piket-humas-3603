@@ -82,7 +82,7 @@ export async function assignJadwal(
 
   // 1. Ambil detail template
   const { data: details, error: detailError } = (await supabase
-    .from('template_detail')
+    .from('template_piket_detail')
     .select('day_of_week, pegawai_id')
     .eq('template_id', templateId)) as any
 
@@ -137,8 +137,40 @@ export async function assignJadwal(
 
   if (error) throw new Error(error.message)
 
-  revalidatePath('/dashboard/jadwal')
+  revalidatePath('/piket/jadwal')
   return { success: true, count: rows.length }
+}
+
+// ---- UPDATE JADWAL HARIAN (Manual Edit) ----
+export async function updateJadwalHarian(tanggal: string, pegawaiIds: string[]) {
+  const { supabase } = await requireAdmin()
+
+  // 1. Hapus semua jadwal pada tanggal tersebut
+  const { error: deleteError } = await supabase
+    .from('jadwal_piket')
+    .delete()
+    .eq('tanggal', tanggal)
+
+  if (deleteError) throw new Error(deleteError.message)
+
+  // 2. Jika ada pegawai yang di-assign, insert jadwal baru
+  if (pegawaiIds.length > 0) {
+    const rows = pegawaiIds.map(id => ({
+      tanggal,
+      pegawai_id: id,
+      // Karena ini edit manual, template_id dibiarkan null atau diabaikan,
+      // struktur database kita memperbolehkan template_id null.
+    }))
+
+    const { error: insertError } = await supabase
+      .from('jadwal_piket')
+      .insert(rows)
+
+    if (insertError) throw new Error(insertError.message)
+  }
+
+  revalidatePath('/piket/jadwal')
+  return { success: true }
 }
 
 // ---- DELETE JADWAL ----
@@ -152,4 +184,42 @@ export async function deleteJadwal(id: string) {
 
   if (error) throw new Error(error.message)
   revalidatePath('/piket')
+}
+
+// ---- GET TODAY SCHEDULE (For Checklist) ----
+export async function getTodaySchedule() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  // Waktu lokal atau padStart manual bisa bermasalah zona waktu, mari amankan dengan Date biasa
+  const d = new Date()
+  const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+  const { data, error } = await supabase
+    .from('jadwal_piket')
+    .select('*')
+    .eq('pegawai_id', user.id)
+    .eq('tanggal', todayStr)
+    .single()
+    
+  if (error) return null
+  return data
+}
+
+// ---- CONFIRM PRESENCE ----
+export async function confirmPresence(jadwalId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthenticated')
+
+  const { error } = await supabase
+    .from('jadwal_piket')
+    .update({ is_hadir: true, hadir_at: new Date().toISOString() })
+    .eq('id', jadwalId)
+    .eq('pegawai_id', user.id)
+
+  if (error) return { error: error.message }
+  revalidatePath('/dashboard')
+  return { success: true }
 }

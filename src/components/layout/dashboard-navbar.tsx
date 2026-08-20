@@ -3,6 +3,7 @@
 import { Bell, Menu, LayoutDashboard, CalendarDays, Users, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { logoutAction } from "@/lib/actions/auth";
+import BotStatusBadge from "@/components/features/monitoring/bot-status-badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -34,16 +35,17 @@ export function DashboardNavbar({ userName, userRole, initials }: DashboardNavba
   const pathname = usePathname();
 
   return (
-    <header className="flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 justify-between md:justify-end">
-      {/* Mobile Menu Trigger */}
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="shrink-0 md:hidden">
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle navigation menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-[280px] p-0">
+    <header className="flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 justify-between">
+      <div className="flex items-center gap-2 md:gap-4">
+        {/* Mobile Menu Trigger */}
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="outline" size="icon" className="shrink-0 md:hidden">
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle navigation menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[280px] p-0">
           <div className="h-full flex flex-col">
             <div className="flex h-16 items-center border-b px-6">
               <div className="flex items-center gap-2 font-semibold">
@@ -66,9 +68,11 @@ export function DashboardNavbar({ userName, userRole, initials }: DashboardNavba
             </nav>
           </div>
         </SheetContent>
-      </Sheet>
+        </Sheet>
+        <BotStatusBadge />
+      </div>
 
-      <div className="flex w-full items-center justify-end gap-4">
+      <div className="flex items-center justify-end gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon" className="relative h-9 w-9 rounded-full">

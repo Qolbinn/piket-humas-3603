@@ -29,7 +29,7 @@ import { toast } from 'sonner'
 import WaToolbar from './WaToolbar'
 import { parseWaMarkdown } from '@/lib/utils/wa-format'
 
-type FormValues = z.infer<typeof faqMenuSchema>
+type FormValues = z.input<typeof faqMenuSchema>
 
 export default function CreateFaqDialog({ faqs }: { faqs: FaqMenu[] }) {
   const [open, setOpen] = React.useState(false)
@@ -76,7 +76,7 @@ export default function CreateFaqDialog({ faqs }: { faqs: FaqMenu[] }) {
       formData.append('is_active', String(data.is_active))
 
       const result = await createFaqMenu(formData)
-      if (result.error) {
+      if ('error' in result && result.error) {
         toast.error(result.error)
       } else {
         toast.success('FAQ berhasil ditambahkan!')

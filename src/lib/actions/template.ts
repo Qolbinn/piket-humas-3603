@@ -34,10 +34,10 @@ export async function getTemplates() {
   const supabase = await createClient()
 
   const { data, error } = await supabase
-    .from('template')
+    .from('template_piket')
     .select(`
       *,
-      template_detail (
+      template_piket_detail (
         day_of_week,
         pegawai (id, name, gender)
       )
@@ -53,10 +53,10 @@ export async function getTemplateById(id: string) {
   const supabase = await createClient()
 
   const { data, error } = (await supabase
-    .from('template')
+    .from('template_piket')
     .select(`
       *,
-      template_detail (
+      template_piket_detail (
         day_of_week,
         pegawai_id
       )
@@ -76,7 +76,7 @@ export async function createTemplate(data: any) {
 
   // 1. Insert Template
   const { data: newTemplate, error: tError } = (await supabase
-    .from('template')
+    .from('template_piket')
     .insert({ name: validated.name })
     .select()
     .single()) as any
@@ -91,16 +91,16 @@ export async function createTemplate(data: any) {
   }))
 
   const { error: dError } = await supabase
-    .from('template_detail')
+    .from('template_piket_detail')
     .insert(details as any)
 
   if (dError) {
     // Cleanup if detail fails
-    await supabase.from('template').delete().eq('id', newTemplate.id)
+    await supabase.from('template_piket').delete().eq('id', newTemplate.id)
     throw new Error(dError.message)
   }
 
-  revalidatePath('/dashboard/template')
+  revalidatePath('/piket')
   return { success: true, id: newTemplate.id }
 }
 
@@ -112,14 +112,14 @@ export async function updateTemplate(id: string, data: any) {
 
   // 1. Update Name
   const { error: tError } = await supabase
-    .from('template')
+    .from('template_piket')
     .update({ name: validated.name })
     .eq('id', id)
 
   if (tError) throw new Error(tError.message)
 
   // 2. Refresh Details (Delete then Re-insert)
-  await supabase.from('template_detail').delete().eq('template_id', id)
+  await supabase.from('template_piket_detail').delete().eq('template_id', id)
 
   const details = validated.details.map(d => ({
     template_id: id,
@@ -128,13 +128,12 @@ export async function updateTemplate(id: string, data: any) {
   }))
 
   const { error: dError } = await supabase
-    .from('template_detail')
+    .from('template_piket_detail')
     .insert(details as any)
 
   if (dError) throw new Error(dError.message)
 
-  revalidatePath('/dashboard/template')
-  revalidatePath(`/dashboard/template/${id}`)
+  revalidatePath('/piket')
   return { success: true }
 }
 
@@ -143,12 +142,12 @@ export async function deleteTemplate(id: string) {
   const { supabase } = await requireAdmin()
 
   const { error } = await supabase
-    .from('template')
+    .from('template_piket')
     .delete()
     .eq('id', id)
 
   if (error) throw new Error(error.message)
 
-  revalidatePath('/dashboard/template')
+  revalidatePath('/piket')
   return { success: true }
 }

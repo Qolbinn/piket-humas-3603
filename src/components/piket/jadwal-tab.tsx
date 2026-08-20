@@ -1,18 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { format, addMonths, subMonths, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, startOfWeek, endOfWeek, isSameDay } from "date-fns";
+import { useState, useEffect, useTransition } from "react";
+import { format, addMonths, subMonths, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, startOfWeek, endOfWeek, isSameDay, eachWeekOfInterval } from "date-fns";
 import { id } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Loader2, Users, CalendarCheck, CheckCircle2, Pencil, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { getJadwalByRange } from "@/lib/actions/jadwal";
+import { getJadwalByRange, assignJadwal, updateJadwalHarian } from "@/lib/actions/jadwal";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface JadwalTabProps {
   initialData: any[];
+  templates: any[];
+  pegawais: any[];
 }
 
-export function JadwalTab({ initialData }: JadwalTabProps) {
+export function JadwalTab({ initialData, templates, pegawais }: JadwalTabProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [jadwal, setJadwal] = useState(initialData);
   const [isLoading, setIsLoading] = useState(false);
@@ -60,6 +71,119 @@ export function JadwalTab({ initialData }: JadwalTabProps) {
     return jadwal.filter(item => isSameDay(new Date(item.tanggal), date));
   };
 
+  // --- ASSIGN LOGIC ---
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [weekSelections, setWeekSelections] = useState<Record<string, string>>({}); // { [weekStart]: templateId }
+
+  // Generate weeks for the selected month in the calendar
+  const weeks = eachWeekOfInterval(
+    { start: monthStart, end: monthEnd },
+    { weekStartsOn: 1 }
+  ).map((weekStart, idx) => {
+    const wStart = startOfWeek(weekStart, { weekStartsOn: 1 });
+    const wEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+    
+    const displayStart = wStart < monthStart ? monthStart : wStart;
+    const displayEnd = wEnd > monthEnd ? monthEnd : wEnd;
+
+    return {
+      id: `w-${idx}`,
+      label: `Minggu ke-${idx + 1}`,
+      start: format(displayStart, "yyyy-MM-dd"),
+      end: format(displayEnd, "yyyy-MM-dd"),
+      displayRange: `${format(displayStart, "d MMM", { locale: id })} - ${format(displayEnd, "d MMM yyyy", { locale: id })}`,
+      isValid: displayStart <= monthEnd && displayEnd >= monthStart
+    };
+  }).filter(w => w.isValid);
+
+  const applyToAll = (templateId: string) => {
+    if (templateId === "none") {
+      setWeekSelections({});
+      return;
+    }
+    const newSelections: Record<string, string> = {};
+    weeks.forEach(w => {
+      newSelections[w.start] = templateId;
+    });
+    setWeekSelections(newSelections);
+  };
+
+  const openAssignDialog = () => {
+    setWeekSelections({});
+    setAssignDialogOpen(true);
+  };
+
+  const handleAssign = async () => {
+    const weeksToAssign = weeks.filter(w => weekSelections[w.start] && weekSelections[w.start] !== "none");
+    if (weeksToAssign.length === 0) return;
+
+    startTransition(async () => {
+      try {
+        let totalCount = 0;
+        for (const week of weeksToAssign) {
+          const templateId = weekSelections[week.start];
+          const res = await assignJadwal(templateId, week.start, week.end);
+          if (res.success) totalCount += res.count || 0;
+        }
+        toast.success(`Berhasil menerapkan template ke ${weeksToAssign.length} minggu (${totalCount} baris jadwal)`);
+        setAssignDialogOpen(false);
+        router.refresh();
+        
+        // Refresh local data to show assigned changes immediately
+        const data = await getJadwalByRange(
+          format(adjustedStart, "yyyy-MM-dd"),
+          format(adjustedEnd, "yyyy-MM-dd")
+        );
+        setJadwal(data);
+      } catch (err: any) {
+        toast.error(err.message);
+      }
+    });
+  };
+
+  // --- EDIT HARIAN LOGIC ---
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editDate, setEditDate] = useState<Date | null>(null);
+  const [editPegawaiIds, setEditPegawaiIds] = useState<string[]>([]);
+  const [searchPegawai, setSearchPegawai] = useState("");
+
+  const openEditDialog = (date: Date) => {
+    const currentSchedule = getScheduleForDay(date);
+    setEditPegawaiIds(currentSchedule.map((s: any) => s.pegawai_id));
+    setEditDate(date);
+    setSearchPegawai("");
+    setEditDialogOpen(true);
+  };
+
+  const toggleEditPegawai = (pegawaiId: string) => {
+    setEditPegawaiIds(prev => 
+      prev.includes(pegawaiId) ? prev.filter(id => id !== pegawaiId) : [...prev, pegawaiId]
+    );
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editDate) return;
+
+    startTransition(async () => {
+      try {
+        const dateStr = format(editDate, "yyyy-MM-dd");
+        await updateJadwalHarian(dateStr, editPegawaiIds);
+        
+        toast.success("Jadwal harian berhasil diperbarui!");
+        setEditDialogOpen(false);
+        router.refresh();
+        
+        const data = await getJadwalByRange(
+          format(adjustedStart, "yyyy-MM-dd"),
+          format(adjustedEnd, "yyyy-MM-dd")
+        );
+        setJadwal(data);
+      } catch (err: any) {
+        toast.error(err.message);
+      }
+    });
+  };
+
   // --- DESKTOP LOGIC (MONTH) ---
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
@@ -98,8 +222,12 @@ export function JadwalTab({ initialData }: JadwalTabProps) {
         </div>
 
         <div className="flex items-center gap-3">
+          <Button variant="default" onClick={openAssignDialog} className="rounded-lg shadow-sm">
+            <CalendarCheck className="mr-2 h-4 w-4" />
+            Assign Petugas
+          </Button>
           <Button variant="outline" onClick={goToToday} className="rounded-lg">
-            Hari Ini
+            Bulan Ini
           </Button>
           <div className="flex items-center rounded-lg border overflow-hidden shadow-sm">
             <Button variant="ghost" size="icon" onClick={prevMonth} className="rounded-none border-r hover:bg-muted">
@@ -131,8 +259,12 @@ export function JadwalTab({ initialData }: JadwalTabProps) {
         </div>
 
         <div className="flex items-center justify-between gap-2">
+          <Button variant="default" size="sm" onClick={openAssignDialog} className="flex-[1.5] rounded-lg">
+            <CalendarCheck className="mr-2 h-4 w-4" />
+            Assign Petugas
+          </Button>
           <Button variant="outline" size="sm" onClick={goToToday} className="flex-1 rounded-lg">
-            Hari Ini
+            Bulan Ini
           </Button>
           <div className="flex items-center rounded-lg border overflow-hidden shadow-sm flex-1">
             <Button variant="ghost" onClick={prevWeek} className="flex-1 rounded-none border-r hover:bg-muted">
@@ -179,11 +311,23 @@ export function JadwalTab({ initialData }: JadwalTabProps) {
                 <div className="flex justify-between items-start">
                   <span className={cn(
                     "text-sm font-semibold w-8 h-8 flex items-center justify-center rounded-full transition-all",
-                    isTodayDate ? "bg-primary text-primary-foreground shadow-md scale-110" : "",
-                    !isCurrentMonth && !isTodayDate ? "opacity-50" : "text-foreground group-hover:text-primary"
+                    isTodayDate ? "bg-primary text-primary-foreground shadow-md scale-110" : "text-foreground group-hover:text-primary",
+                    !isCurrentMonth && !isTodayDate ? "opacity-50" : ""
                   )}>
                     {format(day, "d")}
                   </span>
+                  
+                  {isCurrentMonth && (
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-6 w-6 absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-primary hover:text-primary-foreground"
+                      onClick={() => openEditDialog(day)}
+                      title="Edit jadwal hari ini"
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-1.5 overflow-y-auto no-scrollbar">
@@ -240,11 +384,16 @@ export function JadwalTab({ initialData }: JadwalTabProps) {
                     {weekDaysLabels[idx]}
                   </span>
                 </div>
-                <div className={cn(
-                  "px-3 py-1 text-sm font-bold rounded-full",
-                  isTodayDate ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
-                )}>
-                  {format(day, "d MMM", { locale: id })}
+                <div className="flex items-center gap-2">
+                  <div className={cn(
+                    "px-3 py-1 text-sm font-bold rounded-full",
+                    isTodayDate ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                  )}>
+                    {format(day, "d MMM", { locale: id })}
+                  </div>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-primary/10 hover:text-primary" onClick={() => openEditDialog(day)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
 
@@ -280,6 +429,161 @@ export function JadwalTab({ initialData }: JadwalTabProps) {
         })}
       </div>
 
+      {/* ASSIGN DIALOG */}
+      <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Assign Template ke Kalender</DialogTitle>
+            <DialogDescription>
+              Terapkan template alokasi pada bulan <b>{format(currentDate, "MMMM yyyy", { locale: id })}</b>.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            <div className="space-y-3 bg-muted/20 p-4 rounded-xl border">
+              <Label className="text-primary font-semibold">Setel Serentak (Jalan Pintas)</Label>
+              <Select onValueChange={applyToAll}>
+                <SelectTrigger className="bg-background">
+                  <SelectValue placeholder="Pilih template untuk mengisi semua minggu..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none" className="text-muted-foreground italic">-- Kosongkan Semua --</SelectItem>
+                  {templates.map(t => (
+                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                  ))}
+                  {templates.length === 0 && (
+                    <SelectItem value="empty" disabled>Belum ada template</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">Opsi ini akan mengubah semua pilihan di bawah secara otomatis.</p>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Daftar Minggu (Senin - Jumat)</Label>
+              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 no-scrollbar">
+                {weeks.map((week) => {
+                  const selectedVal = weekSelections[week.start] || "none";
+                  const hasSelection = selectedVal !== "none";
+                  return (
+                    <div
+                      key={week.id}
+                      className={cn(
+                        "flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border transition-all gap-3",
+                        hasSelection ? "bg-primary/5 border-primary/40 shadow-sm" : "bg-background border-muted hover:border-border"
+                      )}
+                    >
+                      <div className="flex flex-col">
+                        <span className={cn("text-sm font-medium", hasSelection ? "text-primary" : "text-foreground")}>{week.label}</span>
+                        <span className="text-xs text-muted-foreground">{week.displayRange}</span>
+                      </div>
+                      
+                      <Select 
+                        value={selectedVal} 
+                        onValueChange={(val) => setWeekSelections(prev => ({...prev, [week.start]: val}))}
+                      >
+                        <SelectTrigger className={cn("w-full sm:w-[180px] h-8 text-xs", !hasSelection && "text-muted-foreground")}>
+                          <SelectValue placeholder="Lewati" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none" className="text-muted-foreground italic">-- Lewati --</SelectItem>
+                          {templates.map(t => (
+                            <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAssignDialogOpen(false)} disabled={isPending}>Batal</Button>
+            <Button disabled={Object.values(weekSelections).filter(v => v !== "none").length === 0 || isPending} onClick={handleAssign}>
+              {isPending ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Memproses...</>
+              ) : (
+                <><Users className="mr-2 h-4 w-4" /> Terapkan ({Object.values(weekSelections).filter(v => v !== "none").length} Minggu)</>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* EDIT HARIAN DIALOG */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle>Edit Petugas Harian</DialogTitle>
+            <DialogDescription>
+              {editDate ? format(editDate, "EEEE, d MMMM yyyy", { locale: id }) : ""}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <Label className="mb-3 block">Daftar Pegawai</Label>
+            
+            <div className="relative mb-3">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Cari nama petugas..."
+                className="pl-9 h-9"
+                value={searchPegawai}
+                onChange={(e) => setSearchPegawai(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2 border rounded-xl p-2 bg-muted/10 max-h-[250px] overflow-y-auto no-scrollbar">
+              {pegawais
+                .filter(p => p.name.toLowerCase().includes(searchPegawai.toLowerCase()))
+                .map((pegawai) => {
+                const isChecked = editPegawaiIds.includes(pegawai.id);
+                return (
+                  <label
+                    key={pegawai.id}
+                    className={cn(
+                      "flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all hover:border-primary/50",
+                      isChecked ? "bg-primary/5 border-primary shadow-sm" : "bg-background border-muted"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Checkbox
+                        checked={isChecked}
+                        onCheckedChange={() => toggleEditPegawai(pegawai.id)}
+                        className={isChecked ? "border-primary bg-primary text-primary-foreground" : ""}
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className={cn("w-2 h-2 rounded-full", pegawai.gender === 'L' ? "bg-blue-500" : "bg-pink-500")} />
+                        <span className={cn("text-sm font-medium", isChecked ? "text-primary" : "text-foreground")}>{pegawai.name}</span>
+                      </div>
+                    </div>
+                    {isChecked && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                  </label>
+                );
+              })}
+              
+              {pegawais.filter(p => p.name.toLowerCase().includes(searchPegawai.toLowerCase())).length === 0 && (
+                <div className="py-8 text-center text-sm text-muted-foreground">
+                  Petugas tidak ditemukan.
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={isPending}>Batal</Button>
+            <Button onClick={handleSaveEdit} disabled={isPending}>
+              {isPending ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Menyimpan...</>
+              ) : (
+                "Simpan Perubahan"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
