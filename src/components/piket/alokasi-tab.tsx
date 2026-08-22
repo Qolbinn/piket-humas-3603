@@ -90,13 +90,11 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
   const handleYearChange = (year: string) => {
     setSelectedYear(year);
     setWeekSelections({});
-    setBulkTemplateId("none");
   };
 
   const handleMonthChange = (month: string) => {
     setSelectedMonth(month);
     setWeekSelections({});
-    setBulkTemplateId("none");
   };
 
   const openAssignDialog = (templateId: string) => {
@@ -105,19 +103,7 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
     setSelectedYear(curYear);
     setSelectedMonth(curMonth);
     
-    // Calculate weeks for the current month to pre-fill
-    const target = new Date(parseInt(curYear), parseInt(curMonth) - 1, 1);
-    const mStart = startOfMonth(target);
-    const mEnd = endOfMonth(mStart);
-    const tempWeeks = eachWeekOfInterval({ start: mStart, end: mEnd }, { weekStartsOn: 1 }).map(w => {
-       const wStart = startOfWeek(w, { weekStartsOn: 1 });
-       const displayStart = wStart < mStart ? mStart : wStart;
-       return { start: format(displayStart, "yyyy-MM-dd") };
-    });
-
-    const initialSelections: Record<string, string> = {};
-    tempWeeks.forEach(w => initialSelections[w.start] = templateId);
-    setWeekSelections(initialSelections);
+    setWeekSelections({});
     setBulkTemplateId(templateId);
     
     setAssignDialogOpen(true);
@@ -320,60 +306,32 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
               </div>
             </div>
 
-            <div className="space-y-3 bg-muted/20 p-4 rounded-xl border">
-              <Label className="text-primary font-semibold">Setel Serentak (Jalan Pintas)</Label>
-              <Select value={bulkTemplateId} onValueChange={(val) => applyToAll(val, weeks)}>
-                <SelectTrigger className="bg-background">
-                  <SelectValue placeholder="Pilih template untuk mengisi semua minggu..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none" className="text-muted-foreground italic">-- Kosongkan Semua --</SelectItem>
-                  {templates.map(t => (
-                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                  ))}
-                  {templates.length === 0 && (
-                    <SelectItem value="empty" disabled>Belum ada template</SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">Opsi ini akan mengubah semua pilihan di bawah secara otomatis.</p>
-            </div>
-
             <div className="space-y-3">
               <Label>Daftar Minggu (Senin - Jumat)</Label>
 
               <div className="space-y-2 border rounded-xl p-2 bg-muted/10 max-h-[250px] overflow-y-auto no-scrollbar">
                 {weeks.map((week) => {
-                  const selectedVal = weekSelections[week.start] || "none";
-                  const hasSelection = selectedVal !== "none";
+                  const isChecked = weekSelections[week.start] === bulkTemplateId;
                   return (
-                    <div
+                    <label
                       key={week.id}
                       className={cn(
-                        "flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border transition-all gap-3",
-                        hasSelection ? "bg-primary/5 border-primary/40 shadow-sm" : "bg-background border-muted hover:border-border"
+                        "flex flex-row items-center justify-between p-3 rounded-lg border transition-all gap-3 cursor-pointer",
+                        isChecked ? "bg-primary/5 border-primary/40 shadow-sm" : "bg-background border-muted hover:border-border"
                       )}
                     >
                       <div className="flex flex-col">
-                        <span className={cn("text-sm font-medium", hasSelection ? "text-primary" : "text-foreground")}>{week.label}</span>
+                        <span className={cn("text-sm font-medium", isChecked ? "text-primary" : "text-foreground")}>{week.label}</span>
                         <span className="text-xs text-muted-foreground">{week.displayRange}</span>
                       </div>
                       
-                      <Select 
-                        value={selectedVal} 
-                        onValueChange={(val) => setWeekSelections(prev => ({...prev, [week.start]: val}))}
-                      >
-                        <SelectTrigger className={cn("w-full sm:w-[180px] h-8 text-xs", !hasSelection && "text-muted-foreground")}>
-                          <SelectValue placeholder="Lewati" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none" className="text-muted-foreground italic">-- Lewati --</SelectItem>
-                          {templates.map(t => (
-                            <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                      <Checkbox 
+                        checked={isChecked} 
+                        onCheckedChange={(checked) => {
+                          setWeekSelections(prev => ({...prev, [week.start]: checked ? bulkTemplateId : "none"}));
+                        }} 
+                      />
+                    </label>
                   );
                 })}
               </div>

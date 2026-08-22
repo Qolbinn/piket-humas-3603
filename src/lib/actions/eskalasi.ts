@@ -65,12 +65,12 @@ export async function getEskalasi({ page, limit = 10, from, to, query: searchQue
 
   // Status filter
   if (status && status !== 'all') {
-    query = query.eq('status', status)
+    query = query.eq('status', status as EskalasiStatus)
   }
 
   // Channel filter
   if (channel && channel !== 'all') {
-    query = query.eq('channel', channel)
+    query = query.eq('channel', channel as "whatsapp" | "email" | "kunjungan_langsung")
   }
 
   // Sorting
@@ -144,7 +144,7 @@ export async function createEskalasi(formData: FormData) {
   const supabase = await createClient()
   const pegawai = await getCurrentPegawai()
   
-  const channel = formData.get('channel') as string
+  const channel = formData.get('channel') as "whatsapp" | "email" | "kunjungan_langsung"
   const created_at = formData.get('created_at') as string
   let pelanggan_lid = formData.get('pelanggan_lid') as string | null
   const nama_pelanggan = formData.get('nama_pelanggan') as string
@@ -185,14 +185,19 @@ export async function createEskalasi(formData: FormData) {
 export async function updateEskalasiDetail(id: string, data: {
   nama_pelanggan: string
   kategori_kode: string
-  channel: string
+  channel: "whatsapp" | "email" | "kunjungan_langsung"
   detail: string
 }) {
   const supabase = await createClient()
 
   const { error } = await supabase
     .from('eskalasi')
-    .update(data)
+    .update({
+      nama_pelanggan: data.nama_pelanggan,
+      kategori_kode: data.kategori_kode,
+      channel: data.channel,
+      detail: data.detail,
+    })
     .eq('id', id)
 
   if (error) throw new Error(error.message)

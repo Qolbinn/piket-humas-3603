@@ -72,7 +72,6 @@ export type JadwalPiket = {
   id: string
   tanggal: string
   pegawai_id: string
-  template_id: string | null
   is_hadir: boolean
   hadir_at: string | null
   created_at: string
@@ -240,7 +239,6 @@ export type Database = {
           id?: string
           tanggal: string
           pegawai_id: string
-          template_id?: string | null
           is_hadir?: boolean
           hadir_at?: string | null
           created_at?: string
@@ -249,7 +247,6 @@ export type Database = {
           id?: string
           tanggal?: string
           pegawai_id?: string
-          template_id?: string | null
           is_hadir?: boolean
           hadir_at?: string | null
           created_at?: string

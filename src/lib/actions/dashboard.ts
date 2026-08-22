@@ -22,7 +22,7 @@ export async function getDashboardStats() {
   const { count: eskalasiWaiting } = await supabase
     .from('eskalasi')
     .select('*', { count: 'exact', head: true })
-    .eq('status', 'waiting')
+    .eq('status', 'OPEN')
 
   // Eskalasi hari ini total
   const { count: eskalasiHariIni } = await supabase

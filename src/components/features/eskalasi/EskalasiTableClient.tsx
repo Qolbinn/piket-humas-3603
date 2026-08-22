@@ -143,7 +143,7 @@ export default function EskalasiTableClient({ data, currentUserId, kategoriList 
     const formData = new FormData(e.currentTarget);
     const payload = {
       nama_pelanggan: formData.get("nama_pelanggan") as string,
-      channel: formData.get("channel") as string,
+      channel: formData.get("channel") as "whatsapp" | "email" | "kunjungan_langsung",
       kategori_kode: formData.get("kategori_kode") as string,
       detail: formData.get("detail") as string,
     };
