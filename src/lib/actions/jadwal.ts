@@ -108,8 +108,7 @@ export async function assignJadwal(
       pegawais.forEach((p: any) => {
         rows.push({
           tanggal: dateStr,
-          pegawai_id: p.pegawai_id,
-          template_id: templateId
+          pegawai_id: p.pegawai_id
         })
       })
     }
@@ -157,9 +156,7 @@ export async function updateJadwalHarian(tanggal: string, pegawaiIds: string[]) 
   if (pegawaiIds.length > 0) {
     const rows = pegawaiIds.map(id => ({
       tanggal,
-      pegawai_id: id,
-      // Karena ini edit manual, template_id dibiarkan null atau diabaikan,
-      // struktur database kita memperbolehkan template_id null.
+      pegawai_id: id
     }))
 
     const { error: insertError } = await supabase

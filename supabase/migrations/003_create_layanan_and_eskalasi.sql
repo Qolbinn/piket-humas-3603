@@ -17,15 +17,14 @@ CREATE TRIGGER kategori_layanan_updated_at
 
 CREATE TABLE IF NOT EXISTS public.eskalasi (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  pelanggan_lid     TEXT NOT NULL,
+  pelanggan_lid     TEXT,
   nama_pelanggan    TEXT NOT NULL,
   kategori_kode     TEXT REFERENCES public.kategori_layanan(kode) ON DELETE SET NULL,
-  channel           TEXT NOT NULL DEFAULT 'whatsapp',
-  keperluan         TEXT NOT NULL,
+  channel           TEXT NOT NULL DEFAULT 'whatsapp' CHECK (channel IN ('whatsapp', 'email', 'kunjungan_langsung')),
   detail            TEXT,
   pegawai_id        UUID REFERENCES public.pegawai(id) ON DELETE SET NULL,
   status            TEXT NOT NULL DEFAULT 'OPEN' CHECK (status IN ('OPEN', 'ON_PROCESS', 'RESOLVED')),
-  feedback_notified BOOLEAN NOT NULL DEFAULT false,
+  feedback_status   TEXT CHECK (feedback_status IN ('PENDING', 'SENT')),
   created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
   resolved_at       TIMESTAMPTZ
 );
@@ -33,6 +32,17 @@ CREATE TABLE IF NOT EXISTS public.eskalasi (
 CREATE INDEX idx_eskalasi_status ON public.eskalasi(status);
 CREATE INDEX idx_eskalasi_created_at ON public.eskalasi(created_at DESC);
 CREATE INDEX idx_eskalasi_pegawai_id ON public.eskalasi(pegawai_id);
+
+-- Computed column for custom sorting (OPEN -> ON_PROCESS -> RESOLVED)
+CREATE OR REPLACE FUNCTION public.status_weight(e public.eskalasi)
+RETURNS int AS $$
+  SELECT CASE e.status 
+    WHEN 'OPEN' THEN 1
+    WHEN 'ON_PROCESS' THEN 2
+    WHEN 'RESOLVED' THEN 3
+    ELSE 4
+  END;
+$$ LANGUAGE SQL IMMUTABLE;
 
 -- Enable RLS
 ALTER TABLE public.kategori_layanan ENABLE ROW LEVEL SECURITY;

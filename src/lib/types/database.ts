@@ -12,7 +12,7 @@ export type Json =
 
 export type Gender = 'L' | 'P'
 export type Role = 'admin' | 'pimpinan' | 'petugas'
-export type EskalasiStatus = 'waiting' | 'handled' | 'closed'
+export type EskalasiStatus = 'OPEN' | 'ON_PROCESS' | 'RESOLVED'
 export type DayOfWeek = 1 | 2 | 3 | 4 | 5
 
 export type Pegawai = {
@@ -72,7 +72,6 @@ export type JadwalPiket = {
   id: string
   tanggal: string
   pegawai_id: string
-  template_id: string | null
   is_hadir: boolean
   hadir_at: string | null
   created_at: string
@@ -82,17 +81,18 @@ export type JadwalPiket = {
 
 export type Eskalasi = {
   id: string
-  nomor_pelanggan: string
+  pelanggan_lid: string | null
   nama_pelanggan: string
-  keperluan: string
+  kategori_kode: string | null
+  channel: 'whatsapp' | 'email' | 'kunjungan_langsung'
   detail: string | null
   pegawai_id: string | null
-  kategori_kode: string | null
   status: EskalasiStatus
-  waktu_respons: number | null
+  feedback_status: 'PENDING' | 'SENT' | null
   created_at: string
-  handled_at: string | null
+  resolved_at: string | null
   pegawai?: Pegawai
+  kategori_layanan?: { nama: string }
 }
 
 export type RiwayatPelanggan = {
@@ -239,7 +239,6 @@ export type Database = {
           id?: string
           tanggal: string
           pegawai_id: string
-          template_id?: string | null
           is_hadir?: boolean
           hadir_at?: string | null
           created_at?: string
@@ -248,7 +247,6 @@ export type Database = {
           id?: string
           tanggal?: string
           pegawai_id?: string
-          template_id?: string | null
           is_hadir?: boolean
           hadir_at?: string | null
           created_at?: string
@@ -259,29 +257,29 @@ export type Database = {
         Row: Eskalasi
         Insert: {
           id?: string
-          nomor_pelanggan: string
+          pelanggan_lid?: string | null
           nama_pelanggan: string
-          keperluan: string
+          kategori_kode?: string | null
+          channel?: 'whatsapp' | 'email' | 'kunjungan_langsung'
           detail?: string | null
           pegawai_id?: string | null
-          kategori_kode?: string | null
           status?: EskalasiStatus
-          waktu_respons?: number | null
+          feedback_status?: 'PENDING' | 'SENT' | null
           created_at?: string
-          handled_at?: string | null
+          resolved_at?: string | null
         }
         Update: {
           id?: string
-          nomor_pelanggan?: string
+          pelanggan_lid?: string | null
           nama_pelanggan?: string
-          keperluan?: string
+          kategori_kode?: string | null
+          channel?: 'whatsapp' | 'email' | 'kunjungan_langsung'
           detail?: string | null
           pegawai_id?: string | null
-          kategori_kode?: string | null
           status?: EskalasiStatus
-          waktu_respons?: number | null
+          feedback_status?: 'PENDING' | 'SENT' | null
           created_at?: string
-          handled_at?: string | null
+          resolved_at?: string | null
         }
         Relationships: []
       }

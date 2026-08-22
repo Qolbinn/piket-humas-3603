@@ -27,7 +27,6 @@ CREATE TABLE IF NOT EXISTS public.jadwal_piket (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tanggal     DATE NOT NULL,
   pegawai_id  UUID NOT NULL REFERENCES public.pegawai(id) ON DELETE CASCADE,
-  template_id UUID REFERENCES public.template_piket(id) ON DELETE SET NULL,
   is_hadir    BOOLEAN NOT NULL DEFAULT false,
   hadir_at    TIMESTAMPTZ,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
