@@ -33,7 +33,7 @@ const getMenuItems = (role: string): MenuItem[] => {
 
   if (role === "admin" || role === "pimpinan" || role === "petugas") {
     items.push({ name: "Jadwal Piket", href: "/piket", icon: CalendarDays });
-    items.push({ name: "Eskalasi Pelanggan", href: "/pelanggan", icon: MessageSquare });
+    items.push({ name: "Eskalasi Pelanggan", href: "/eskalasi", icon: MessageSquare });
   }
 
   if (role === "admin") {

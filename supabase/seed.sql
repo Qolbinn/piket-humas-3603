@@ -126,3 +126,65 @@ INSERT INTO public.faq_menu (id, parent_id, kode, title, is_menu, content) VALUE
 -- SECTION 6: BOT STATUS
 -- ============================================================
 INSERT INTO public.bot_status (service_name, last_ping_at, status) VALUES ('whatsapp-bot', now(), 'ACTIVE') ON CONFLICT (service_name) DO NOTHING;
+
+-- ============================================================
+-- SECTION 7: ESKALASI PELANGGAN
+-- ============================================================
+DO $$
+DECLARE
+  v_nama_pelanggan text[] := ARRAY['Budi Santoso', 'Siti Aminah', 'Andi Pratama', 'Ayu Lestari', 'Joko Widodo', 'Dewi Sartika', 'Rina Nose', 'Raffi Ahmad', 'Nagita Slavina', 'Atta Halilintar', 'Aurel Hermansyah', 'Deddy Corbuzier', 'Ivan Gunawan', 'Ruben Onsu', 'Baim Wong', 'Paula Verhoeven', 'Luna Maya', 'Ariel Noah', 'Agnez Mo', 'Iwan Fals'];
+  v_kategori text[] := ARRAY['1', '2', '99'];
+  v_pegawai uuid[] := ARRAY[
+    '11111111-1111-1111-1111-111111111111'::uuid, 
+    '22222222-2222-2222-2222-222222222222'::uuid,
+    '33333333-3333-3333-3333-333333333333'::uuid,
+    '44444444-4444-4444-4444-444444444444'::uuid
+  ];
+  v_status text[] := ARRAY['OPEN', 'ON_PROCESS', 'RESOLVED'];
+  v_detail text[] := ARRAY['Mohon dikirimkan rincian data kemiskinan tahun 2023', 'Saya kesulitan mengisi form kuesioner Sensus Pertanian, bisa minta panduannya?', 'Ada petugas yang datang ke rumah namun tidak memakai tanda pengenal resmi, mohon ditindaklanjuti', 'Tanya jadwal publikasi inflasi terbaru', 'Bagaimana cara mendapatkan data PDRB kecamatan?', 'Mohon bantuan reset password aplikasi FAS', 'Petugas tidak sopan saat wawancara', 'Data di BPS berbeda dengan Pemda, mohon pencerahan', 'Saya ingin mengundang narasumber dari BPS', 'Tolong kirimkan data IPM 5 tahun terakhir'];
+  
+  rand_nama text;
+  rand_kategori text;
+  rand_pegawai uuid;
+  rand_status text;
+  rand_detail text;
+  rand_days int;
+  rand_lid text;
+  rand_channel text;
+  rand_feedback text;
+  channels_arr text[] := array['whatsapp', 'email', 'kunjungan_langsung'];
+  feedbacks_arr text[] := array['PENDING', 'SENT', NULL];
+BEGIN
+  FOR i IN 1..250 LOOP
+    rand_nama := v_nama_pelanggan[1 + (random() * 19)::int];
+    rand_kategori := v_kategori[1 + (random() * 2)::int];
+    rand_status := v_status[1 + (random() * 2)::int];
+    rand_detail := v_detail[1 + (random() * 9)::int];
+    rand_days := (random() * 60)::int;
+    rand_channel := channels_arr[1 + (random() * 2)::int];
+    rand_feedback := feedbacks_arr[1 + (random() * 2)::int];
+    rand_lid := '628' || (1000000000 + (random() * 8999999999)::bigint)::text || '@s.whatsapp.net';
+    
+    IF rand_status = 'OPEN' THEN
+      rand_pegawai := NULL;
+    ELSE
+      rand_pegawai := v_pegawai[1 + (random() * 3)::int];
+    END IF;
+
+    INSERT INTO public.eskalasi (
+      pelanggan_lid, nama_pelanggan, kategori_kode, channel, detail, 
+      pegawai_id, status, feedback_status, created_at, resolved_at
+    ) VALUES (
+      CASE WHEN rand_channel = 'whatsapp' THEN rand_lid ELSE NULL END, 
+      rand_nama || ' ' || i::text, 
+      rand_kategori, 
+      rand_channel, 
+      rand_detail || ' (Tiket #' || i::text || ')',
+      rand_pegawai, 
+      rand_status, 
+      CASE WHEN rand_channel = 'whatsapp' AND rand_status = 'RESOLVED' THEN rand_feedback ELSE NULL END,
+      now() - (rand_days || ' days')::interval - ((random() * 24) || ' hours')::interval,
+      CASE WHEN rand_status = 'RESOLVED' THEN now() - (rand_days || ' days')::interval + ((random() * 24) || ' hours')::interval ELSE NULL END
+    );
+  END LOOP;
+END $$;
