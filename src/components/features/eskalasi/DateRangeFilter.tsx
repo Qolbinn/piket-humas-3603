@@ -18,17 +18,26 @@ import {
 
 export function DateRangeFilter({
   className,
-}: React.HTMLAttributes<HTMLDivElement>) {
+  paramFrom = "from",
+  paramTo = "to",
+  defaultFrom,
+  defaultTo,
+}: React.HTMLAttributes<HTMLDivElement> & { 
+  paramFrom?: string; 
+  paramTo?: string;
+  defaultFrom?: Date;
+  defaultTo?: Date;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   // Initialize from URL if available
-  const fromParam = searchParams.get("from");
-  const toParam = searchParams.get("to");
+  const fromParam = searchParams.get(paramFrom);
+  const toParam = searchParams.get(paramTo);
 
   const [date, setDate] = React.useState<DateRange | undefined>({
-    from: fromParam ? new Date(fromParam) : undefined,
-    to: toParam ? new Date(toParam) : undefined,
+    from: fromParam ? new Date(fromParam) : defaultFrom,
+    to: toParam ? new Date(toParam) : defaultTo,
   });
 
   const [isOpen, setIsOpen] = React.useState(false);
@@ -38,15 +47,15 @@ export function DateRangeFilter({
     params.set("page", "1");
 
     if (date?.from) {
-      params.set("from", format(date.from, "yyyy-MM-dd"));
+      params.set(paramFrom, format(date.from, "yyyy-MM-dd"));
     } else {
-      params.delete("from");
+      params.delete(paramFrom);
     }
 
     if (date?.to) {
-      params.set("to", format(date.to, "yyyy-MM-dd"));
+      params.set(paramTo, format(date.to, "yyyy-MM-dd"));
     } else {
-      params.delete("to");
+      params.delete(paramTo);
     }
 
     const newQueryString = params.toString();

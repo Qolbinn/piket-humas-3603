@@ -2,15 +2,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, MessageSquare, Clock, LayoutDashboard } from "lucide-react";
 import { getJadwalByRange, getTodaySchedule } from "@/lib/actions/jadwal";
 import PresenceChecklist from "@/components/features/monitoring/presence-checklist";
-import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { MyScheduleCard } from "@/components/dashboard/my-schedule-card";
+import { StatsFilter } from "@/components/features/dashboard/stats-filter";
 import ChatDensityChart from "@/components/features/dashboard/chat-density-chart";
-import { getDashboardStats } from "@/lib/actions/dashboard";
+import { DashboardPieCharts } from "@/components/features/dashboard/dashboard-pie-charts";
+import { SlaCard } from "@/components/features/dashboard/sla-card";
+import { getDashboardStats, getCategoryDistribution, getChannelDistribution } from "@/lib/actions/dashboard";
 import { DateRangeFilter } from "@/components/features/eskalasi/DateRangeFilter";
-import { subDays, startOfDay } from "date-fns";
+import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage({
@@ -19,7 +21,10 @@ export default async function DashboardPage({
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
   const resolvedSearchParams = await searchParams;
-  let { from, to } = resolvedSearchParams;
+  let { from, to, stats_filter } = resolvedSearchParams;
+  
+  const filter = (stats_filter as 'today' | 'week' | 'month') || 'today';
+  const filterLabel = filter === 'week' ? 'Minggu Ini' : filter === 'month' ? 'Bulan Ini' : 'Hari Ini';
 
   if (!from || !to) {
     const end = new Date();
@@ -33,22 +38,72 @@ export default async function DashboardPage({
     
     redirect(`/dashboard?${newParams.toString()}`);
   }
-  const todayStr = format(new Date(), "yyyy-MM-dd");
+  const now = new Date();
+  const pieFrom = resolvedSearchParams.pie_from || format(startOfMonth(now), "yyyy-MM-dd");
+  const pieTo = resolvedSearchParams.pie_to || format(endOfMonth(now), "yyyy-MM-dd");
+
+  const todayStr = format(now, "yyyy-MM-dd");
   let officersToday: any[] = [];
   let myTodaySchedule: any = null;
-  let stats: any = { totalPercakapan: 0, eskalasiOpen: 0, eskalasiOnProcess: 0, petugas: [] };
+  let stats: any = { totalPercakapan: 0, eskalasiOpen: 0, eskalasiOnProcess: 0, petugas: [], averageSla: 0 };
+  let categoryData: any[] = [];
+  let channelData: any[] = [];
+
   try {
     officersToday = await getJadwalByRange(todayStr, todayStr);
     myTodaySchedule = await getTodaySchedule();
-    stats = await getDashboardStats();
+    stats = await getDashboardStats(filter);
+    categoryData = await getCategoryDistribution(pieFrom, pieTo);
+    channelData = await getChannelDistribution(pieFrom, pieTo);
   } catch (err) {
     console.error("Gagal mengambil data dashboard:", err);
   }
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight text-primary">Dashboard</h1>
-        <p className="text-muted-foreground text-lg">Ringkasan aktivitas chatbot dan piket humas hari ini.</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-bold tracking-tight text-primary">Dashboard</h1>
+          <p className="text-muted-foreground text-lg">Ringkasan aktivitas chatbot dan piket humas hari ini.</p>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <StatsFilter />
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="rounded-xl flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Cek Petugas Piket
+              </Button>
+            </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Petugas Piket Aktif ({format(new Date(), "dd MMMM yyyy", { locale: id })})</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-2.5 py-4">
+              {officersToday.length > 0 ? (
+                officersToday.map((item: any, idx: number) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-3 rounded-lg border bg-muted/30"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className={`w-2.5 h-2.5 rounded-full ${item.pegawai?.gender === 'L' ? 'bg-blue-500' : 'bg-pink-500'}`} />
+                      <span className="font-semibold text-sm">{item.pegawai?.name}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {item.pegawai?.gender === 'L' ? 'Laki-laki' : 'Perempuan'}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-6 text-sm text-muted-foreground italic border border-dashed rounded-lg">
+                  Tidak ada petugas yang ditugaskan hari ini.
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+        </div>
       </div>
 
       {myTodaySchedule && (
@@ -63,7 +118,7 @@ export default async function DashboardPage({
         <Card className="border-none shadow-md bg-gradient-to-br from-primary/10 via-background to-background relative overflow-hidden">
           <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none"></div>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 z-10 relative">
-            <CardTitle className="text-sm font-semibold text-muted-foreground">Chat Masuk Hari Ini</CardTitle>
+            <CardTitle className="text-sm font-semibold text-muted-foreground">Chat Masuk {filterLabel}</CardTitle>
             <div className="p-2 bg-primary/10 rounded-lg">
               <MessageSquare className="h-5 w-5 text-primary" />
             </div>
@@ -102,55 +157,9 @@ export default async function DashboardPage({
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-md bg-gradient-to-br from-green-500/10 via-background to-background relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/10 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none"></div>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 z-10 relative">
-            <CardTitle className="text-sm font-semibold text-muted-foreground">Petugas Piket Aktif</CardTitle>
-            <div className="p-2 bg-green-500/10 rounded-lg">
-              <Clock className="h-5 w-5 text-green-600" />
-            </div>
-          </CardHeader>
-          <CardContent className="z-10 relative">
-            <div className="text-3xl font-extrabold text-foreground">
-              {officersToday.length} <span className="text-lg font-semibold text-muted-foreground">Orang</span>
-            </div>
-
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="link" className="p-0 h-auto text-sm text-green-600 hover:text-green-700 font-medium mt-1 underline">
-                  Lihat petugas hari ini
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Petugas Piket Aktif ({format(new Date(), "dd MMMM yyyy", { locale: id })})</DialogTitle>
-                </DialogHeader>
-                <div className="flex flex-col gap-2.5 py-4">
-                  {officersToday.length > 0 ? (
-                    officersToday.map((item: any, idx: number) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between p-3 rounded-lg border bg-muted/30"
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div className={`w-2.5 h-2.5 rounded-full ${item.pegawai?.gender === 'L' ? 'bg-blue-500' : 'bg-pink-500'}`} />
-                          <span className="font-semibold text-sm">{item.pegawai?.name}</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          {item.pegawai?.gender === 'L' ? 'Laki-laki' : 'Perempuan'}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-6 text-sm text-muted-foreground italic border border-dashed rounded-lg">
-                      Tidak ada petugas yang ditugaskan hari ini.
-                    </div>
-                  )}
-                </div>
-              </DialogContent>
-            </Dialog>
-          </CardContent>
-        </Card>
+        <SlaCard 
+          sla={stats.averageSla} 
+        />
       </div>
 
       <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
@@ -174,6 +183,13 @@ export default async function DashboardPage({
           <MyScheduleCard />
         </div>
       </div>
+
+      <DashboardPieCharts 
+        categoryData={categoryData} 
+        channelData={channelData} 
+        defaultFrom={startOfMonth(now)}
+        defaultTo={endOfMonth(now)}
+      />
     </div>
   );
 }
