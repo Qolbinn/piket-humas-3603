@@ -3,7 +3,7 @@
 import * as React from "react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -30,6 +30,7 @@ export function DateRangeFilter({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = React.useTransition();
 
   // Initialize from URL if available
   const fromParam = searchParams.get(paramFrom);
@@ -58,11 +59,13 @@ export function DateRangeFilter({
       params.delete(paramTo);
     }
 
-    const newQueryString = params.toString();
-    if (searchParams.toString() !== newQueryString) {
-      router.push(`?${newQueryString}`);
-    }
-    setIsOpen(false);
+    startTransition(() => {
+      const newQueryString = params.toString();
+      if (searchParams.toString() !== newQueryString) {
+        router.push(`?${newQueryString}`);
+      }
+      setIsOpen(false);
+    });
   };
 
   return (
@@ -102,7 +105,16 @@ export function DateRangeFilter({
             locale={id}
           />
           <div className="p-3 border-t bg-muted/20 flex justify-end">
-            <Button onClick={applyFilter} size="sm">Terapkan</Button>
+            <Button onClick={applyFilter} size="sm" disabled={isPending}>
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Menyimpan...
+                </>
+              ) : (
+                "Terapkan"
+              )}
+            </Button>
           </div>
         </PopoverContent>
       </Popover>

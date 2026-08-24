@@ -7,6 +7,12 @@ import { PieChart as PieChartIcon } from "lucide-react";
 
 const COLORS = ["#0595d7", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#64748b"];
 
+const CHANNEL_COLORS: Record<string, string> = {
+  whatsapp: "#22c55e", // Hijau
+  email: "#f59e0b", // Kuning/Orange
+  kunjungan_langsung: "#0595d7", // Biru
+};
+
 interface DataItem {
   name: string;
   value: number;
@@ -20,6 +26,9 @@ interface PieChartsProps {
 }
 
 export function DashboardPieCharts({ categoryData, channelData, defaultFrom, defaultTo }: PieChartsProps) {
+  const totalCategory = categoryData.reduce((acc, curr) => acc + curr.value, 0);
+  const totalChannel = channelData.reduce((acc, curr) => acc + curr.value, 0);
+
   return (
     <div className="grid gap-6 md:grid-cols-2">
       {/* Kategori Layanan */}
@@ -57,7 +66,10 @@ export function DashboardPieCharts({ categoryData, channelData, defaultFrom, def
                   ))}
                 </Pie>
                 <Tooltip 
-                  formatter={(value: any) => [`${value} Tiket`, 'Jumlah']}
+                  formatter={(value: any) => {
+                    const percentage = totalCategory > 0 ? ((value / totalCategory) * 100).toFixed(1) : 0;
+                    return [`${value} Tiket (${percentage}%)`, 'Jumlah'];
+                  }}
                   contentStyle={{ 
                     backgroundColor: 'var(--background)',
                     borderColor: 'var(--border)',
@@ -109,11 +121,17 @@ export function DashboardPieCharts({ categoryData, channelData, defaultFrom, def
                   dataKey="value"
                 >
                   {channelData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={CHANNEL_COLORS[entry.name.toLowerCase()] || COLORS[index % COLORS.length]} 
+                    />
                   ))}
                 </Pie>
                 <Tooltip 
-                  formatter={(value: any) => [`${value} Tiket`, 'Jumlah']}
+                  formatter={(value: any) => {
+                    const percentage = totalChannel > 0 ? ((value / totalChannel) * 100).toFixed(1) : 0;
+                    return [`${value} Tiket (${percentage}%)`, 'Jumlah'];
+                  }}
                   contentStyle={{ 
                     backgroundColor: 'var(--background)',
                     borderColor: 'var(--border)',

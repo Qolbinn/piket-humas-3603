@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, MessageSquare, Clock, LayoutDashboard } from "lucide-react";
 import { getJadwalByRange, getTodaySchedule } from "@/lib/actions/jadwal";
+import PageHeader from "@/components/layout/page-header";
 import PresenceChecklist from "@/components/features/monitoring/presence-checklist";
 import { id } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -61,10 +62,12 @@ export default async function DashboardPage({
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-bold tracking-tight text-primary">Dashboard</h1>
-          <p className="text-muted-foreground text-lg">Ringkasan aktivitas chatbot dan piket humas hari ini.</p>
-        </div>
+        <PageHeader 
+          title="Dashboard" 
+          description="Ringkasan aktivitas chatbot dan piket humas hari ini." 
+          breadcrumbText="Beranda" 
+          breadcrumbIcon={LayoutDashboard} 
+        />
         
         <div className="flex items-center gap-2">
           <StatsFilter />
