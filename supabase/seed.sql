@@ -206,3 +206,29 @@ BEGIN
     );
   END LOOP;
 END $$;
+
+-- ============================================================
+-- SECTION 8: RIWAYAT CHAT HARIAN
+-- ============================================================
+DO $$
+DECLARE
+  rand_date date;
+  rand_lid text;
+  rand_hour int;
+BEGIN
+  -- Insert random chat history for the last 30 days
+  FOR i IN 1..300 LOOP
+    rand_date := current_date - (random() * 30)::int;
+    rand_hour := (random() * 23)::int;
+    rand_lid := '628' || (1000000000 + (random() * 8999999999)::bigint)::text || '@s.whatsapp.net';
+    
+    INSERT INTO public.riwayat_chat_harian (
+      lid_wa, tanggal, waktu_first_chat
+    ) VALUES (
+      rand_lid, 
+      rand_date, 
+      rand_date + (rand_hour || ' hours')::interval + ((random() * 59) || ' minutes')::interval
+    )
+    ON CONFLICT (lid_wa, tanggal) DO NOTHING;
+  END LOOP;
+END $$;

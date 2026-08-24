@@ -7,16 +7,42 @@ import { id } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { MyScheduleCard } from "@/components/dashboard/my-schedule-card";
+import ChatDensityChart from "@/components/features/dashboard/chat-density-chart";
+import { getDashboardStats } from "@/lib/actions/dashboard";
+import { DateRangeFilter } from "@/components/features/eskalasi/DateRangeFilter";
+import { subDays, startOfDay } from "date-fns";
+import { redirect } from "next/navigation";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}) {
+  const resolvedSearchParams = await searchParams;
+  let { from, to } = resolvedSearchParams;
+
+  if (!from || !to) {
+    const end = new Date();
+    const start = subDays(end, 6); // Last 7 days
+    const defaultFrom = format(start, "yyyy-MM-dd");
+    const defaultTo = format(end, "yyyy-MM-dd");
+    
+    const newParams = new URLSearchParams();
+    newParams.set("from", defaultFrom);
+    newParams.set("to", defaultTo);
+    
+    redirect(`/dashboard?${newParams.toString()}`);
+  }
   const todayStr = format(new Date(), "yyyy-MM-dd");
   let officersToday: any[] = [];
   let myTodaySchedule: any = null;
+  let stats: any = { totalPercakapan: 0, eskalasiOpen: 0, eskalasiOnProcess: 0, petugas: [] };
   try {
     officersToday = await getJadwalByRange(todayStr, todayStr);
     myTodaySchedule = await getTodaySchedule();
+    stats = await getDashboardStats();
   } catch (err) {
-    console.error("Gagal mengambil jadwal hari ini:", err);
+    console.error("Gagal mengambil data dashboard:", err);
   }
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -33,36 +59,46 @@ export default async function DashboardPage() {
         />
       )}
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="border-none shadow-md bg-gradient-to-br from-primary/10 via-background to-background relative overflow-hidden">
           <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none"></div>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 z-10 relative">
-            <CardTitle className="text-sm font-semibold text-muted-foreground">Total Percakapan Hari Ini</CardTitle>
+            <CardTitle className="text-sm font-semibold text-muted-foreground">Chat Masuk Hari Ini</CardTitle>
             <div className="p-2 bg-primary/10 rounded-lg">
               <MessageSquare className="h-5 w-5 text-primary" />
             </div>
           </CardHeader>
           <CardContent className="z-10 relative">
-            <div className="text-3xl font-extrabold text-foreground">Coming Soon</div>
-            <p className="text-sm text-green-600 font-medium mt-1 flex items-center gap-1">
-              <span className="text-lg leading-none">+</span>xx% <span className="text-muted-foreground font-normal">dari hari kemarin</span>
-            </p>
+            <div className="text-3xl font-extrabold text-foreground">{stats.totalPercakapan}</div>
+            <p className="text-xs text-muted-foreground mt-1">Interaksi pelanggan via chatbot</p>
           </CardContent>
         </Card>
 
         <Card className="border-none shadow-md bg-gradient-to-br from-secondary/10 via-background to-background relative overflow-hidden">
           <div className="absolute top-0 right-0 w-24 h-24 bg-secondary/10 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none"></div>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 z-10 relative">
-            <CardTitle className="text-sm font-semibold text-muted-foreground">Eskalasi ke Petugas</CardTitle>
+            <CardTitle className="text-sm font-semibold text-muted-foreground">Eskalasi OPEN</CardTitle>
             <div className="p-2 bg-secondary/10 rounded-lg">
               <Users className="h-5 w-5 text-secondary" />
             </div>
           </CardHeader>
           <CardContent className="z-10 relative">
-            <div className="text-3xl font-extrabold text-foreground">Coming Soon</div>
-            <p className="text-sm text-secondary font-medium mt-1 flex items-center gap-1">
-              xx pelanggan <span className="text-muted-foreground font-normal">sedang menunggu</span>
-            </p>
+            <div className="text-3xl font-extrabold text-foreground">{stats.eskalasiOpen}</div>
+            <p className="text-xs text-muted-foreground mt-1">Menunggu ditangani petugas</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-md bg-gradient-to-br from-orange-500/10 via-background to-background relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 z-10 relative">
+            <CardTitle className="text-sm font-semibold text-muted-foreground">Eskalasi ON PROCESS</CardTitle>
+            <div className="p-2 bg-orange-500/10 rounded-lg">
+              <Clock className="h-5 w-5 text-orange-600" />
+            </div>
+          </CardHeader>
+          <CardContent className="z-10 relative">
+            <div className="text-3xl font-extrabold text-foreground">{stats.eskalasiOnProcess}</div>
+            <p className="text-xs text-muted-foreground mt-1">Sedang ditangani petugas</p>
           </CardContent>
         </Card>
 
@@ -118,14 +154,19 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
-        <div className="md:col-span-2 lg:col-span-3 h-[400px] rounded-2xl border bg-card text-card-foreground shadow-sm flex flex-col items-center justify-center text-muted-foreground overflow-hidden relative">
+        <div className="md:col-span-2 lg:col-span-3 h-[400px] rounded-2xl border bg-card text-card-foreground shadow-sm flex flex-col items-center justify-center text-muted-foreground overflow-hidden relative p-4">
           <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02] bg-[size:20px_20px]"></div>
-          <div className="z-10 flex flex-col items-center gap-3">
-            <div className="p-4 bg-muted rounded-full">
-              <LayoutDashboard className="h-8 w-8 text-muted-foreground" />
+          <div className="z-10 w-full h-full flex flex-col">
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h3 className="font-semibold text-lg text-foreground">Kepadatan Interaksi Chatbot</h3>
+                <p className="text-sm text-muted-foreground">Total chat pelanggan per hari</p>
+              </div>
+              <DateRangeFilter />
             </div>
-            <p className="text-lg font-medium">Area Chart Statistik Mingguan</p>
-            <p className="text-sm text-muted-foreground max-w-sm text-center">Data chart akan diimplementasikan setelah koneksi database tersedia.</p>
+            <div className="flex-1 w-full relative">
+              <ChatDensityChart from={from} to={to} />
+            </div>
           </div>
         </div>
         

@@ -14,21 +14,21 @@ export async function getDashboardStats() {
 
   // Total chat hari ini
   const { count: totalPercakapan } = await supabase
-    .from('riwayat_pelanggan')
+    .from('riwayat_chat_harian')
     .select('*', { count: 'exact', head: true })
-    .gte('created_at', `${today}T00:00:00`)
+    .eq('tanggal', today)
 
-  // Eskalasi menunggu
-  const { count: eskalasiWaiting } = await supabase
+  // Eskalasi OPEN
+  const { count: eskalasiOpen } = await supabase
     .from('eskalasi')
     .select('*', { count: 'exact', head: true })
     .eq('status', 'OPEN')
 
-  // Eskalasi hari ini total
-  const { count: eskalasiHariIni } = await supabase
+  // Eskalasi ON_PROCESS
+  const { count: eskalasiOnProcess } = await supabase
     .from('eskalasi')
     .select('*', { count: 'exact', head: true })
-    .gte('created_at', `${today}T00:00:00`)
+    .eq('status', 'ON_PROCESS')
 
   // Petugas piket hari ini
   const { data: piketHariIni } = await supabase
@@ -38,8 +38,32 @@ export async function getDashboardStats() {
 
   return {
     totalPercakapan:  totalPercakapan  ?? 0,
-    eskalasiWaiting:  eskalasiWaiting  ?? 0,
-    eskalasiHariIni:  eskalasiHariIni  ?? 0,
+    eskalasiOpen:     eskalasiOpen     ?? 0,
+    eskalasiOnProcess:eskalasiOnProcess?? 0,
     petugas:          piketHariIni     ?? [],
   }
+}
+
+export async function getChatHistoryByDateRange(startDate: string, endDate: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('riwayat_chat_harian')
+    .select('tanggal')
+    .gte('tanggal', startDate)
+    .lte('tanggal', endDate);
+
+  if (error) {
+    console.error('Error getChatHistoryByDateRange:', error);
+    return [];
+  }
+
+  // Aggregate count by date
+  const countsByDate = data.reduce((acc: Record<string, number>, item) => {
+    acc[item.tanggal] = (acc[item.tanggal] || 0) + 1;
+    return acc;
+  }, {});
+
+  return Object.entries(countsByDate)
+    .map(([date, count]) => ({ date, count }))
+    .sort((a, b) => a.date.localeCompare(b.date));
 }

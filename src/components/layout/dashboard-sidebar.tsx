@@ -51,7 +51,15 @@ const getMenuItems = (role: string): MenuItem[] => {
   }
 
   if (role === "admin" || role === "pimpinan") {
-    items.push({ name: "Monitoring", href: "/monitoring", icon: ClipboardList });
+    items.push({ 
+      name: "Monitoring", 
+      href: "/monitoring", 
+      icon: ClipboardList,
+      subItems: [
+        { name: "Kinerja Petugas", href: "/monitoring/petugas" },
+        { name: "Log Notifikasi", href: "/monitoring/notif-log" }
+      ]
+    });
   }
 
   items.push({ name: "Profil Saya", href: "/profile", icon: UserCircle });

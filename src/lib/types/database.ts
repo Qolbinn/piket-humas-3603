@@ -251,7 +251,15 @@ export type Database = {
           hadir_at?: string | null
           created_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "jadwal_piket_pegawai_id_fkey"
+            columns: ["pegawai_id"]
+            isOneToOne: false
+            referencedRelation: "pegawai"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       eskalasi: {
         Row: Eskalasi
@@ -315,6 +323,18 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
+      }
+      riwayat_chat_harian: {
+        Row: any
+        Insert: any
+        Update: any
+        Relationships: []
+      }
+      bot_notif_log: {
+        Row: any
+        Insert: any
+        Update: any
         Relationships: []
       }
     }
