@@ -42,7 +42,10 @@ Fokus minggu kedua adalah membangun halaman tempat para petugas akan menghabiska
 **Hari 10-11: Dashboard Analitik Pimpinan & Admin**
 - [ ] **Card Statistic:** Ringkasan Total Eskalasi Hari Ini, Eskalasi Tertunda (OPEN), dan Selesai (RESOLVED).
 - [ ] **Chart / Grafik Harian:** Visualisasi sederhana dari tabel `riwayat_chat_harian` untuk menunjukkan kepadatan/jam sibuk pelanggan berinteraksi dengan chatbot setiap harinya.
-- [ ] **Log Notifikasi:** Halaman tabel `bot_notif_log` bagi Admin untuk memantau apakah *reminder/feedback* sukses terkirim ke WhatsApp.
+- [ ] **Log Notifikasi (`bot_notif_log`):** Halaman tabel bagi Admin untuk memantau riwayat pengiriman pesan otomatis ke WhatsApp. Notifikasi yang dicatat mencakup:
+  1. **Reminder Piket:** Pengingat jadwal piket harian kepada petugas apakah sukses terkirim pada hari H.
+  2. **Feedback Survei:** Pesan survei kepuasan ke pelanggan setelah tiket eskalasi diselesaikan (di-*flag* PENDING untuk dikirim).
+  3. **Reminder SLA (Eskalasi Tertunda):** Peringatan berkala (misal tiap jam 13.00 di hari kerja) ke petugas jika masih ada tiket berstatus OPEN atau ON_PROCESS agar SLA tetap terjaga.
 
 **Hari 12-13: Testing & Integrasi Servis WA Bot**
 - [ ] **End-to-End Testing:** Coba *flow* penuh dengan menghubungkan Service Node.js (Baileys) ke Supabase dan lakukan *chat* langsung via WhatsApp simulasi.

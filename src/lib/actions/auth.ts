@@ -139,3 +139,38 @@ export async function updateProfileAction(formData: FormData) {
   revalidatePath('/', 'layout')
   return { success: true }
 }
+
+// ---- CHANGE PASSWORD (VERIFY OLD) ----
+export async function changePasswordWithCurrentAction(formData: FormData) {
+  const supabase = await createClient()
+  const oldPassword = formData.get('oldPassword') as string
+  const newPassword = formData.get('password') as string
+
+  if (!oldPassword || !newPassword || newPassword.length < 6) {
+    return { error: 'Semua field wajib diisi dan password baru minimal 6 karakter.' }
+  }
+
+  // 1. Get current user
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user?.email) {
+    return { error: 'Sesi tidak ditemukan, silakan login ulang.' }
+  }
+
+  // 2. Verify old password by attempting sign in
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: oldPassword,
+  })
+
+  if (signInError) {
+    return { error: 'Password lama salah.' }
+  }
+
+  // 3. Update password
+  const { error: updateError } = await supabase.auth.updateUser({ password: newPassword })
+  if (updateError) {
+    return { error: 'Gagal mengubah password.' }
+  }
+
+  return { success: 'Password berhasil diubah!' }
+}

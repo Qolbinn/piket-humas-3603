@@ -3,7 +3,7 @@
 import * as React from "react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -18,17 +18,27 @@ import {
 
 export function DateRangeFilter({
   className,
-}: React.HTMLAttributes<HTMLDivElement>) {
+  paramFrom = "from",
+  paramTo = "to",
+  defaultFrom,
+  defaultTo,
+}: React.HTMLAttributes<HTMLDivElement> & { 
+  paramFrom?: string; 
+  paramTo?: string;
+  defaultFrom?: Date;
+  defaultTo?: Date;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = React.useTransition();
 
   // Initialize from URL if available
-  const fromParam = searchParams.get("from");
-  const toParam = searchParams.get("to");
+  const fromParam = searchParams.get(paramFrom);
+  const toParam = searchParams.get(paramTo);
 
   const [date, setDate] = React.useState<DateRange | undefined>({
-    from: fromParam ? new Date(fromParam) : undefined,
-    to: toParam ? new Date(toParam) : undefined,
+    from: fromParam ? new Date(fromParam) : defaultFrom,
+    to: toParam ? new Date(toParam) : defaultTo,
   });
 
   const [isOpen, setIsOpen] = React.useState(false);
@@ -38,22 +48,24 @@ export function DateRangeFilter({
     params.set("page", "1");
 
     if (date?.from) {
-      params.set("from", format(date.from, "yyyy-MM-dd"));
+      params.set(paramFrom, format(date.from, "yyyy-MM-dd"));
     } else {
-      params.delete("from");
+      params.delete(paramFrom);
     }
 
     if (date?.to) {
-      params.set("to", format(date.to, "yyyy-MM-dd"));
+      params.set(paramTo, format(date.to, "yyyy-MM-dd"));
     } else {
-      params.delete("to");
+      params.delete(paramTo);
     }
 
-    const newQueryString = params.toString();
-    if (searchParams.toString() !== newQueryString) {
-      router.push(`?${newQueryString}`);
-    }
-    setIsOpen(false);
+    startTransition(() => {
+      const newQueryString = params.toString();
+      if (searchParams.toString() !== newQueryString) {
+        router.push(`?${newQueryString}`);
+      }
+      setIsOpen(false);
+    });
   };
 
   return (
@@ -93,7 +105,16 @@ export function DateRangeFilter({
             locale={id}
           />
           <div className="p-3 border-t bg-muted/20 flex justify-end">
-            <Button onClick={applyFilter} size="sm">Terapkan</Button>
+            <Button onClick={applyFilter} size="sm" disabled={isPending}>
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Menyimpan...
+                </>
+              ) : (
+                "Terapkan"
+              )}
+            </Button>
           </div>
         </PopoverContent>
       </Popover>
