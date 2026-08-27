@@ -5,7 +5,7 @@
 CREATE TABLE IF NOT EXISTS public.bot_status (
   service_name  TEXT PRIMARY KEY,
   last_ping_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-  status        TEXT NOT NULL DEFAULT 'IDLE' CHECK (status IN ('IDLE', 'ACTIVE', 'ERROR'))
+  status        TEXT NOT NULL DEFAULT 'ONLINE' CHECK (status IN ('ONLINE', 'ERROR'))
 );
 
 ALTER TABLE public.bot_status ENABLE ROW LEVEL SECURITY;
