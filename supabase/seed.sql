@@ -232,3 +232,35 @@ BEGIN
     ON CONFLICT (lid_wa, tanggal) DO NOTHING;
   END LOOP;
 END $$;
+
+-- ============================================================
+-- SECTION 9: TEMPLATE PESAN
+-- ============================================================
+INSERT INTO public.template_pesan (tipe, konten) VALUES
+  ('greeting', 'Selamat {{timeGreeting}} {{customerName}}, selamat datang di SIPASTI (Sistem Pelayanan Statistik Terintegrasi) BPS Kabupaten Tangerang.'),
+  ('reminder_jadwal', 'Selamat pagi, {{operatorName}}
+Hari ini adalah jadwal piket Anda
+
+Jangan lupa untuk absen dan memantau layanan eskalasi yang masuk melalui link berikut
+ _pst-bps-3603/dashboard_
+ _pst-bps-3603/dashboard_
+
+Berikut merupakan jumlah tiket eskalasi yang belum diselesaikan
+*Tiket Open* : {{openTicket}}
+*Tiket Diproses* : {{onProcessTicket}}'),
+  ('reminder_eskalasi', 'Selamat pagi/siang, {{operatorName}}
+Berikut merupakan jumlah tiket eskalasi yang belum diselesaikan
+
+*Tiket Open* : {{openTicket}}
+*Tiket Diproses* : {{onProcessTicket}}
+
+Silahkan pantau perkembangan tiket eskalasi pelanggan dan berikan pelayanan yang terbaik'),
+  ('create_ticket', '✅ Tiket Eskalasi telah berhasil dibuat
+
+Terima kasih {{customerName}}, mohon menunggu petugas kami untuk memberikan layanan yang terbaik'),
+  ('feedback', 'Selamat {{timeGreeting}} {{customerName}}, layanan bantuan eskalasi telah selesai ditangani. Terima kasih telah menghubungi kami
+
+Mohon kesediaannya mengisi ulasan penilaian layanan kami melalui link berikut:
+_s.bps.go.id/SKD3603_
+_s.bps.go.id/SKD3603_')
+ON CONFLICT (tipe) DO UPDATE SET konten = EXCLUDED.konten;

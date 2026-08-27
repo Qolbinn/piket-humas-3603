@@ -107,22 +107,39 @@ export function DashboardSidebar({ userRole }: { userRole: string }) {
 
             return (
               <div key={item.name} className="flex flex-col gap-1">
-                <Link href={item.href} onClick={(e) => item.subItems ? toggleMenu(item.name, e) : null}>
-                  <span
-                    className={cn(
-                      "flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-muted",
-                      isActive ? "bg-muted text-primary" : "text-muted-foreground"
-                    )}
+                {item.subItems ? (
+                  <button
+                    onClick={(e) => toggleMenu(item.name, e)}
+                    className="w-full text-left"
                   >
-                    <div className="flex items-center gap-3">
-                      <item.icon className={cn("h-5 w-5", isActive ? "text-primary" : "")} />
-                      {item.name}
-                    </div>
-                    {item.subItems && (
-                      isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
-                    )}
-                  </span>
-                </Link>
+                    <span
+                      className={cn(
+                        "flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-muted",
+                        isActive ? "bg-muted text-primary" : "text-muted-foreground"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <item.icon className={cn("h-5 w-5", isActive ? "text-primary" : "")} />
+                        {item.name}
+                      </div>
+                      {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </span>
+                  </button>
+                ) : (
+                  <Link href={item.href}>
+                    <span
+                      className={cn(
+                        "flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-muted",
+                        isActive ? "bg-muted text-primary" : "text-muted-foreground"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <item.icon className={cn("h-5 w-5", isActive ? "text-primary" : "")} />
+                        {item.name}
+                      </div>
+                    </span>
+                  </Link>
+                )}
                 
                 {/* Submenu rendering */}
                 {item.subItems && isOpen && (
