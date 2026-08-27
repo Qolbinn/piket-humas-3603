@@ -25,7 +25,7 @@ const TEMPLATE_TYPES = [
   {
     id: "greeting",
     label: "Sambutan",
-    desc: "Pesan awal saat eskalasi baru masuk melalui WhatsApp.",
+    desc: "Pesan awal saat pelanggan pertama kali menghubungi nomor WhatsApp Kantor.",
     variables: [
       { id: "{{timeGreeting}}", label: "Waktu Sapaan (Pagi/Siang/Malam)" },
       { id: "{{customerName}}", label: "Nama Pelanggan" }
@@ -36,7 +36,9 @@ const TEMPLATE_TYPES = [
     label: "Pengingat Jadwal",
     desc: "Pesan pengingat ke petugas piket sebelum jadwalnya.",
     variables: [
-      { id: "{{operatorName}}", label: "Nama Petugas Piket" }
+      { id: "{{operatorName}}", label: "Nama Petugas Piket" },
+      { id: "{{openTicket}}", label: "Jumlah tiket yang berstatus Open (Menunggu)" },
+      { id: "{{onProcessTicket}}", label: "Jumlah tiket yang berstatus On Process" }
     ]
   },
   {

@@ -23,6 +23,27 @@ export async function getTemplates() {
   return data;
 }
 
+export async function getTemplateById(id: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("template_piket")
+    .select(`
+      *,
+      template_piket_detail(
+        *,
+        pegawai(*)
+      )
+    `)
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    console.error("Error fetching template by id:", error);
+    return null;
+  }
+  return data;
+}
+
 export async function createTemplate(data: any) {
   const supabase = await createClient();
   

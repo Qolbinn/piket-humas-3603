@@ -58,6 +58,14 @@ export type Template = {
   updated_at: string
 }
 
+export type TemplatePesan = {
+  id: string
+  tipe: string
+  konten: string
+  created_at: string
+  updated_at: string
+}
+
 export type TemplateDetail = {
   id: string
   template_id: string
@@ -210,6 +218,24 @@ export type Database = {
         Update: {
           id?: string
           name?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      template_pesan: {
+        Row: TemplatePesan
+        Insert: {
+          id?: string
+          tipe: string
+          konten: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tipe?: string
+          konten?: string
           created_at?: string
           updated_at?: string
         }
