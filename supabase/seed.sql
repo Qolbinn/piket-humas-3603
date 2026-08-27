@@ -143,7 +143,7 @@ INSERT INTO public.faq_menu (id, parent_id, kode, title, is_menu, content) VALUE
 -- ============================================================
 -- SECTION 6: BOT STATUS
 -- ============================================================
-INSERT INTO public.bot_status (service_name, last_ping_at, status) VALUES ('whatsapp-bot', now(), 'ACTIVE') ON CONFLICT (service_name) DO NOTHING;
+-- INSERT INTO public.bot_status (service_name, last_ping_at, status) VALUES ('whatsapp-bot', now(), 'ONLINE') ON CONFLICT (service_name) DO NOTHING;
 
 -- ============================================================
 -- SECTION 7: ESKALASI PELANGGAN

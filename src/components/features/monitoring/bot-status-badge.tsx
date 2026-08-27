@@ -23,7 +23,7 @@ export default function BotStatusBadge() {
       const { data } = await supabase
         .from('bot_status')
         .select('last_ping_at')
-        .eq('service_name', 'whatsapp-bot')
+        .eq('service_name', 'whatsapp_bot')
         .single()
       
       if (data?.last_ping_at) {
@@ -39,9 +39,9 @@ export default function BotStatusBadge() {
       .channel('bot_status_changes')
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'bot_status', filter: 'service_name=eq.whatsapp-bot' },
+        { event: '*', schema: 'public', table: 'bot_status', filter: 'service_name=eq.whatsapp_bot' },
         (payload) => {
-          if (payload.new.last_ping_at) {
+          if (payload.new && 'last_ping_at' in payload.new) {
             setLastPing(new Date(payload.new.last_ping_at))
           }
         }
