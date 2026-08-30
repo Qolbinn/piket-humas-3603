@@ -88,17 +88,25 @@ export function DashboardSidebar({ userRole }: { userRole: string }) {
   };
 
   return (
-    <div className="hidden border-r bg-muted/20 md:flex md:w-64 md:flex-col">
-      <div className="flex h-16 items-center border-b px-6">
-        <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-          <Image src="/logo-bps.svg" alt="Logo" width={28} height={28} className="h-7 w-7 object-contain" />
-          <span className="text-xl text-primary font-bold">Humas</span>
+    <div className="hidden border-r border-border/60 bg-muted/20 md:flex md:w-64 md:flex-col shadow-xs">
+      {/* Brand Header */}
+      <div className="flex h-16 items-center border-b border-border/60 px-5">
+        <Link href="/dashboard" className="flex items-center gap-3 font-semibold group">
+          <Image src="/logo-bps.svg" alt="Logo BPS" width={32} height={32} className="h-8 w-8 object-contain transition-transform group-hover:scale-105" />
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1.5">
+              <span className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-primary to-blue-700 bg-clip-text text-transparent">SIPASTI</span>
+              <span className="text-[9px] font-extrabold bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase">3603</span>
+            </div>
+            <span className="text-[10px] text-muted-foreground font-medium -mt-1">Piket & Layanan Humas</span>
+          </div>
         </Link>
       </div>
-      <div className="flex flex-1 flex-col justify-between p-4">
-        <nav className="grid items-start gap-2">
+
+      {/* Navigation Links */}
+      <div className="flex flex-1 flex-col justify-between p-3.5">
+        <nav className="grid items-start gap-1.5">
           {menuItems.map((item) => {
-            // Dashboard exact match, others startsWith
             const isActive = item.href === '/dashboard' 
               ? pathname === '/dashboard' 
               : pathname.startsWith(item.href);
@@ -114,28 +122,32 @@ export function DashboardSidebar({ userRole }: { userRole: string }) {
                   >
                     <span
                       className={cn(
-                        "flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-muted",
-                        isActive ? "bg-muted text-primary" : "text-muted-foreground"
+                        "flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-200",
+                        isActive
+                          ? "bg-primary/10 text-primary border-l-4 border-primary shadow-xs"
+                          : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
                       )}
                     >
                       <div className="flex items-center gap-3">
-                        <item.icon className={cn("h-5 w-5", isActive ? "text-primary" : "")} />
-                        {item.name}
+                        <item.icon className={cn("h-4 w-4 shrink-0 stroke-[2.25]", isActive ? "text-primary" : "text-muted-foreground")} />
+                        <span>{item.name}</span>
                       </div>
-                      {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      {isOpen ? <ChevronUp className="h-4 w-4 shrink-0 opacity-70" /> : <ChevronDown className="h-4 w-4 shrink-0 opacity-70" />}
                     </span>
                   </button>
                 ) : (
                   <Link href={item.href}>
                     <span
                       className={cn(
-                        "flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-muted",
-                        isActive ? "bg-muted text-primary" : "text-muted-foreground"
+                        "flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-200",
+                        isActive
+                          ? "bg-primary/10 text-primary border-l-4 border-primary shadow-xs"
+                          : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
                       )}
                     >
                       <div className="flex items-center gap-3">
-                        <item.icon className={cn("h-5 w-5", isActive ? "text-primary" : "")} />
-                        {item.name}
+                        <item.icon className={cn("h-4 w-4 shrink-0 stroke-[2.25]", isActive ? "text-primary" : "text-muted-foreground")} />
+                        <span>{item.name}</span>
                       </div>
                     </span>
                   </Link>
@@ -143,15 +155,17 @@ export function DashboardSidebar({ userRole }: { userRole: string }) {
                 
                 {/* Submenu rendering */}
                 {item.subItems && isOpen && (
-                  <div className="ml-9 flex flex-col gap-1 border-l pl-2 mt-1 transition-all duration-200">
+                  <div className="ml-4 flex flex-col gap-1 border-l-2 border-border/60 pl-3 my-1 transition-all duration-200">
                     {item.subItems.map((sub) => {
                       const isSubActive = pathname.startsWith(sub.href);
                       return (
                         <Link key={sub.name} href={sub.href}>
                           <span
                             className={cn(
-                              "block rounded-lg px-3 py-1.5 text-sm transition-all hover:bg-muted",
-                              isSubActive ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground"
+                              "block rounded-lg px-3 py-2 text-xs sm:text-sm transition-all duration-200",
+                              isSubActive 
+                                ? "bg-primary/10 text-primary font-bold border-l-2 border-primary" 
+                                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground font-medium"
                             )}
                           >
                             {sub.name}
@@ -166,14 +180,15 @@ export function DashboardSidebar({ userRole }: { userRole: string }) {
           })}
         </nav>
         
-        <div className="mt-auto">
+        {/* Logout Footer Button */}
+        <div className="mt-auto pt-4 border-t border-border/60">
           <Button 
-            variant="outline" 
-            className="w-full justify-start gap-2 text-muted-foreground"
+            variant="ghost" 
+            className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors font-semibold text-sm rounded-xl px-3.5 h-10"
             onClick={async () => await logoutAction()}
           >
             <LogOut className="h-4 w-4" />
-            Keluar
+            <span>Keluar Sistem</span>
           </Button>
         </div>
       </div>

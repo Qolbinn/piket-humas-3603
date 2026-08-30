@@ -32,10 +32,10 @@ export function DashboardPieCharts({ categoryData, channelData, defaultFrom, def
   return (
     <div className="grid gap-6 md:grid-cols-2">
       {/* Kategori Layanan */}
-      <Card className="flex flex-col h-[400px]">
-        <CardHeader className="flex flex-row items-center justify-between pb-2 border-b">
-          <div className="space-y-1">
-            <CardTitle className="text-base font-semibold">Distribusi Kategori Layanan</CardTitle>
+      <Card className="flex flex-col h-[400px] rounded-2xl border border-border/80 shadow-xs">
+        <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/60">
+          <div className="space-y-0.5">
+            <CardTitle className="text-base font-bold text-foreground">Distribusi Kategori Layanan</CardTitle>
             <p className="text-xs text-muted-foreground">Persentase tiket eskalasi per kategori</p>
           </div>
           <div className="flex items-center gap-2">
@@ -73,7 +73,7 @@ export function DashboardPieCharts({ categoryData, channelData, defaultFrom, def
                   contentStyle={{ 
                     backgroundColor: 'var(--background)',
                     borderColor: 'var(--border)',
-                    borderRadius: '8px',
+                    borderRadius: '12px',
                     color: 'var(--foreground)'
                   }}
                   itemStyle={{ color: 'var(--foreground)' }}
@@ -91,10 +91,10 @@ export function DashboardPieCharts({ categoryData, channelData, defaultFrom, def
       </Card>
 
       {/* Jalur Komunikasi */}
-      <Card className="flex flex-col h-[400px]">
-        <CardHeader className="flex flex-row items-center justify-between pb-2 border-b">
-          <div className="space-y-1">
-            <CardTitle className="text-base font-semibold">Jalur Komunikasi (Channels)</CardTitle>
+      <Card className="flex flex-col h-[400px] rounded-2xl border border-border/80 shadow-xs">
+        <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/60">
+          <div className="space-y-0.5">
+            <CardTitle className="text-base font-bold text-foreground">Jalur Komunikasi (Channels)</CardTitle>
             <p className="text-xs text-muted-foreground">Platform asal masuknya pelanggan</p>
           </div>
           <div className="flex items-center gap-2">
@@ -135,7 +135,7 @@ export function DashboardPieCharts({ categoryData, channelData, defaultFrom, def
                   contentStyle={{ 
                     backgroundColor: 'var(--background)',
                     borderColor: 'var(--border)',
-                    borderRadius: '8px',
+                    borderRadius: '12px',
                     color: 'var(--foreground)'
                   }}
                   itemStyle={{ color: 'var(--foreground)' }}
