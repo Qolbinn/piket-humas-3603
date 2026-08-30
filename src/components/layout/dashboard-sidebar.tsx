@@ -91,7 +91,7 @@ export function DashboardSidebar({ userRole }: { userRole: string }) {
     <div className="hidden border-r bg-muted/20 md:flex md:w-64 md:flex-col">
       <div className="flex h-16 items-center border-b px-6">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-          <Image src="/logo-bps.svg" alt="Logo" width={28} height={28} className="h-7 w-auto" style={{ width: "auto" }} />
+          <Image src="/logo-bps.svg" alt="Logo" width={28} height={28} className="h-7 w-7 object-contain" />
           <span className="text-xl text-primary font-bold">Humas</span>
         </Link>
       </div>

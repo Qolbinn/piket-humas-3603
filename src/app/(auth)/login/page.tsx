@@ -48,7 +48,7 @@ export default function LoginPage() {
 
       <Link href="/" className="flex items-center gap-3 mb-8 hover:opacity-80 transition-opacity">
         <div className="bg-white p-2 rounded-xl shadow-sm border">
-          <Image src="/logo-bps.svg" alt="Logo" width={40} height={40} className="h-10 w-auto" style={{ width: "auto" }} />
+          <Image src="/logo-bps.svg" alt="Logo" width={40} height={40} className="h-10 w-10 object-contain" />
         </div>
         <div className="flex flex-col">
           <span className="text-2xl font-bold text-primary leading-none">Humas</span>
