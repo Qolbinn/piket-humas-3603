@@ -10,8 +10,8 @@ Semua perubahan berfokus **100% pada estetika visual, konsistensi warna/sistem d
 
 - [x] **Modul 1: Layout Shell & Navigasi Utama** (`Sidebar`, `Navbar`, `PageHeader`)
 - [x] **Modul 2: Dasbor Utama** (`/dashboard`)
-- [ ] **Modul 3: Eskalasi Pelanggan** (`/eskalasi`)
-- [ ] **Modul 4: Manajemen Jadwal Piket** (`/piket`)
+- [x] **Modul 3: Eskalasi Pelanggan** (`/eskalasi`)
+- [x] **Modul 4: Manajemen Jadwal Piket** (`/piket`)
 - [ ] **Modul 5: Master Data** (`/master/layanan`, `/master/faq`, `/master/template`)
 - [ ] **Modul 6: Monitoring & Log Sistem** (`/monitoring/petugas`, `/monitoring/notif-log`)
 - [ ] **Modul 7: Data Pegawai** (`/pegawai`)

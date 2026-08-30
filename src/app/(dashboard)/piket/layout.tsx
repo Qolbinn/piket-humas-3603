@@ -15,7 +15,7 @@ export default function PiketLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500 pb-8">
       <PageHeader
         title="Jadwal Piket"
         description="Kelola jadwal piket harian dan alokasi petugas humas."
@@ -24,22 +24,22 @@ export default function PiketLayout({ children }: { children: React.ReactNode })
       />
       
       <Tabs value={activeTab} className="w-full">
-        <TabsList className="grid w-full md:w-[400px] grid-cols-2 mb-6">
+        <TabsList className="grid w-full md:w-[400px] grid-cols-2 h-11 p-1 bg-muted/60 rounded-2xl border border-border/60 mb-6">
           <TabsTrigger 
             value="jadwal" 
-            className="flex items-center gap-2"
+            className="flex items-center justify-center gap-2 rounded-xl font-bold text-xs sm:text-sm h-full data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-xs transition-all"
             onClick={() => router.push('/piket/jadwal')}
           >
             <CalendarDays className="h-4 w-4" />
-            Jadwal Piket
+            <span>Jadwal Piket</span>
           </TabsTrigger>
           <TabsTrigger 
             value="alokasi" 
-            className="flex items-center gap-2"
+            className="flex items-center justify-center gap-2 rounded-xl font-bold text-xs sm:text-sm h-full data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-xs transition-all"
             onClick={() => router.push('/piket/alokasi')}
           >
             <Users className="h-4 w-4" />
-            Alokasi Petugas
+            <span>Alokasi Petugas</span>
           </TabsTrigger>
         </TabsList>
         
