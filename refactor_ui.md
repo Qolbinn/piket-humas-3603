@@ -13,7 +13,7 @@ Semua perubahan berfokus **100% pada estetika visual, konsistensi warna/sistem d
 - [x] **Modul 3: Eskalasi Pelanggan** (`/eskalasi`)
 - [x] **Modul 4: Manajemen Jadwal Piket** (`/piket`)
 - [x] **Modul 5: Master Data** (`/master/layanan`, `/master/faq`, `/master/template`)
-- [ ] **Modul 6: Monitoring & Log Sistem** (`/monitoring/petugas`, `/monitoring/notif-log`)
+- [x] **Modul 6: Monitoring & Log Sistem** (`/monitoring/petugas`, `/monitoring/notif-log`)
 - [ ] **Modul 7: Data Pegawai** (`/pegawai`)
 - [ ] **Modul 8: Profil Saya** (`/profile`)
 
