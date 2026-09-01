@@ -78,23 +78,25 @@ export function DataTable<TData, TValue>({
   return (
     <div className="space-y-4">
       {/* Table Controls (Filter & Columns Visibility) */}
-      <div className="flex items-center justify-between">
-        <Input
-          placeholder="Cari berdasarkan nama atau email..."
-          value={(table.getColumn('email')?.getFilterValue() as string) ?? ''}
-          onChange={(event) => {
-            table.getColumn('email')?.setFilterValue(event.target.value)
-          }}
-          className="max-w-sm rounded-xl"
-        />
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="relative w-full md:max-w-sm">
+          <Input
+            placeholder="Cari berdasarkan nama atau email..."
+            value={(table.getColumn('email')?.getFilterValue() as string) ?? ''}
+            onChange={(event) => {
+              table.getColumn('email')?.setFilterValue(event.target.value)
+            }}
+            className="pl-3.5 bg-background rounded-xl h-10 border-border/80 text-sm shadow-2xs w-full"
+          />
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto rounded-xl">
+            <Button variant="outline" className="ml-auto rounded-xl h-10 border-border/80 text-sm font-bold shadow-2xs">
               <Settings2 className="mr-2 h-4 w-4" />
               Kolom
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[150px] rounded-xl">
+          <DropdownMenuContent align="end" className="w-[160px] rounded-2xl p-1.5 shadow-md">
             {table
               .getAllColumns()
               .filter((column) => column.getCanHide())
@@ -113,7 +115,7 @@ export function DataTable<TData, TValue>({
                 return (
                   <DropdownMenuCheckboxItem
                     key={column.id}
-                    className="capitalize"
+                    className="capitalize text-xs font-bold rounded-xl"
                     checked={column.getIsVisible()}
                     onCheckedChange={(value) => column.toggleVisibility(!!value)}
                   >
@@ -126,14 +128,14 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Main Table */}
-      <div className="rounded-lg border bg-card overflow-hidden shadow-sm">
+      <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs">
         <Table>
-          <TableHeader className="bg-muted/30">
+          <TableHeader className="bg-muted/40">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="border-border/60">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className="font-semibold text-muted-foreground whitespace-nowrap">
+                    <TableHead key={header.id} className="py-3.5">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -152,10 +154,10 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className="hover:bg-muted/30 transition-colors"
+                  className="hover:bg-muted/30 transition-colors border-border/60"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="py-3">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -172,7 +174,7 @@ export function DataTable<TData, TValue>({
                 >
                   <div className="flex flex-col items-center justify-center text-muted-foreground gap-3">
                     <UserCircle className="h-10 w-10 opacity-30" />
-                    <p className="text-sm">Data tidak ditemukan.</p>
+                    <p className="text-sm">Data pegawai tidak ditemukan.</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -182,28 +184,30 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          Menampilkan {table.getRowModel().rows.length} baris data.
+      <div className="flex items-center justify-between py-2">
+        <div className="text-xs font-medium text-muted-foreground">
+          Menampilkan {table.getRowModel().rows.length} pegawai.
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-          className="rounded-xl"
-        >
-          Sebelumnya
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-          className="rounded-xl"
-        >
-          Selanjutnya
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="rounded-xl h-9 px-4 text-xs font-bold"
+          >
+            Sebelumnya
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="rounded-xl h-9 px-4 text-xs font-bold"
+          >
+            Selanjutnya
+          </Button>
+        </div>
       </div>
     </div>
   )

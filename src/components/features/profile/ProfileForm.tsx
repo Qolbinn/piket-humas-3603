@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Lock, Mail, AtSign } from 'lucide-react'
 
 type FormValues = z.infer<typeof updateProfileSchema>
 
@@ -50,44 +50,51 @@ export default function ProfileForm({ pegawai }: ProfileFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Read-only fields */}
       <div className="space-y-1.5">
-        <Label>Email</Label>
-        <Input
-          value={pegawai.email}
-          disabled
-          className="rounded-xl bg-muted/50 text-muted-foreground"
-        />
-        <p className="text-xs text-muted-foreground">Email tidak dapat diubah.</p>
+        <Label className="text-xs font-bold text-muted-foreground">Email</Label>
+        <div className="relative">
+          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+          <Input
+            value={pegawai.email}
+            disabled
+            className="pl-10 rounded-xl bg-muted/40 text-muted-foreground border-border/60 font-medium text-xs h-10"
+          />
+          <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
+        </div>
       </div>
 
       <div className="space-y-1.5">
-        <Label>Username</Label>
-        <Input
-          value={pegawai.username}
-          disabled
-          className="rounded-xl bg-muted/50 text-muted-foreground"
-        />
+        <Label className="text-xs font-bold text-muted-foreground">Username</Label>
+        <div className="relative">
+          <AtSign className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+          <Input
+            value={pegawai.username}
+            disabled
+            className="pl-10 rounded-xl bg-muted/40 text-muted-foreground border-border/60 font-mono text-xs h-10"
+          />
+          <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
+        </div>
       </div>
 
-      <div className="border-t pt-5 space-y-5">
+      <div className="border-t border-border/60 pt-4 space-y-4">
         {/* Editable fields */}
         <div className="space-y-1.5">
-          <Label htmlFor="profile-name">Nama Lengkap</Label>
+          <Label htmlFor="profile-name" className="text-xs font-bold text-foreground">Nama Lengkap</Label>
           <Input
             id="profile-name"
             placeholder="Masukkan nama lengkap"
             {...register('name')}
-            className="rounded-xl"
+            className="rounded-xl h-10 border-border/80 text-sm shadow-2xs"
             disabled={isPending}
           />
-          {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
+          {errors.name && <p className="text-destructive text-xs font-medium">{errors.name.message}</p>}
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="profile-phone">
-            Nomor Telepon{' '}
+          <Label htmlFor="profile-phone" className="text-xs font-bold text-foreground">
+            Nomor Telepon / WhatsApp{' '}
             <span className="text-muted-foreground font-normal">(opsional)</span>
           </Label>
           <Input
@@ -95,10 +102,10 @@ export default function ProfileForm({ pegawai }: ProfileFormProps) {
             type="tel"
             placeholder="Contoh: 08123456789"
             {...register('phone')}
-            className="rounded-xl"
+            className="rounded-xl h-10 border-border/80 text-sm shadow-2xs font-mono"
             disabled={isPending}
           />
-          {errors.phone && <p className="text-destructive text-xs">{errors.phone.message}</p>}
+          {errors.phone && <p className="text-destructive text-xs font-medium">{errors.phone.message}</p>}
         </div>
       </div>
 
@@ -106,7 +113,7 @@ export default function ProfileForm({ pegawai }: ProfileFormProps) {
         type="submit"
         id="save-profile"
         disabled={isPending || !isDirty}
-        className="w-full rounded-xl"
+        className="w-full rounded-xl h-10 font-bold shadow-xs mt-2"
       >
         {isPending ? (
           <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Menyimpan...</>

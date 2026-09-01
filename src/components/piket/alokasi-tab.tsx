@@ -179,17 +179,17 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
       {/* Template Grid */}
       <div className="grid grid-cols-1 gap-6">
         {filteredTemplates.map((tpl) => (
-          <Card key={tpl.id} className="overflow-hidden border-muted/60 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="bg-muted/20 pb-4 border-b flex flex-row items-start justify-between space-y-0">
+          <Card key={tpl.id} className="overflow-hidden border border-border/80 shadow-xs hover:shadow-md transition-all rounded-2xl">
+            <CardHeader className="bg-muted/30 pb-4 border-b border-border/60 flex flex-row items-start justify-between space-y-0">
               <div>
-                <CardTitle className="text-lg">{tpl.name}</CardTitle>
-                <CardDescription>Alokasi 5 hari kerja (Senin - Jumat)</CardDescription>
+                <CardTitle className="text-lg font-bold text-foreground">{tpl.name}</CardTitle>
+                <CardDescription className="text-xs text-muted-foreground mt-0.5">Alokasi 5 hari kerja (Senin - Jumat)</CardDescription>
               </div>
               <div className="flex gap-1">
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-8 w-8 text-muted-foreground hover:text-primary"
+                  className="h-8 w-8 rounded-lg text-muted-foreground hover:text-primary"
                   onClick={() => {
                     setEditingTemplate(tpl);
                     setTemplateDialogOpen(true);
@@ -201,7 +201,7 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                  className="h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive"
                   onClick={() => setTemplateToDelete(tpl.id)}
                   disabled={isPending}
                 >
@@ -210,23 +210,23 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="grid grid-cols-1 sm:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x">
+              <div className="grid grid-cols-1 sm:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x border-border/60">
                 {[1, 2, 3, 4, 5].map((dayNum) => {
                   const dayName = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"][dayNum - 1];
                   const details = tpl.template_piket_detail.filter((d: any) => d.day_of_week === dayNum);
                   
                   return (
                     <div key={dayNum} className="p-3 bg-card hover:bg-muted/10 transition-colors">
-                      <div className="text-xs font-bold text-muted-foreground mb-2 text-center border-b pb-2">{dayName}</div>
+                      <div className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider mb-2 text-center border-b pb-2">{dayName}</div>
                       <div className="flex flex-col gap-1.5 mt-2">
                         {details.map((d: any, i: number) => (
                           <div key={i} className={cn(
-                            "text-[10px] sm:text-[11px] px-1.5 py-1 rounded truncate border flex items-center gap-1.5",
+                            "text-[11px] px-2 py-1 rounded-lg font-bold border flex items-center gap-1.5 truncate shadow-2xs",
                             d.pegawai.gender === 'L'
-                              ? "bg-blue-50/50 text-blue-700 border-blue-100"
-                              : "bg-pink-50/50 text-pink-700 border-pink-100"
+                              ? "bg-blue-500/10 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-300 dark:border-blue-800"
+                              : "bg-pink-500/10 text-pink-700 border-pink-200 dark:bg-pink-950/30 dark:text-pink-300 dark:border-pink-800"
                           )}>
-                            <div className={cn("w-1 h-1 rounded-full shrink-0", d.pegawai.gender === 'L' ? "bg-blue-500" : "bg-pink-500")} />
+                            <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", d.pegawai.gender === 'L' ? "bg-blue-500" : "bg-pink-500")} />
                             <span className="truncate">{d.pegawai.name}</span>
                           </div>
                         ))}
@@ -239,20 +239,20 @@ export function AlokasiTab({ templates, pegawais }: AlokasiTabProps) {
                 })}
               </div>
             </CardContent>
-            <CardFooter className="bg-muted/10 pt-4 pb-4 border-t flex justify-end">
-              <Button onClick={() => openAssignDialog(tpl.id)} className="shadow-sm">
-                <CalendarCheck className="mr-2 h-4 w-4" />
-                Assign ke Kalender
+            <CardFooter className="bg-muted/20 pt-3 pb-3 border-t border-border/60 flex justify-end">
+              <Button onClick={() => openAssignDialog(tpl.id)} className="rounded-xl shadow-xs font-bold gap-2">
+                <CalendarCheck className="h-4 w-4" />
+                <span>Assign ke Kalender</span>
               </Button>
             </CardFooter>
           </Card>
         ))}
 
         {filteredTemplates.length === 0 && (
-          <div className="py-20 text-center border-2 border-dashed rounded-2xl bg-muted/5">
-            <Users className="h-10 w-10 text-muted-foreground/30 mx-auto mb-4" />
-            <h3 className="text-lg font-medium">Tidak ada template ditemukan</h3>
-            <p className="text-sm text-muted-foreground">Silakan buat template alokasi petugas baru.</p>
+          <div className="py-16 text-center border border-dashed rounded-2xl bg-muted/10">
+            <Users className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-foreground">Tidak ada template ditemukan</h3>
+            <p className="text-xs text-muted-foreground">Silakan buat template alokasi petugas baru.</p>
           </div>
         )}
       </div>

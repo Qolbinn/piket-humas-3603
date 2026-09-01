@@ -206,34 +206,34 @@ export function JadwalTab({ initialData, templates, pegawais }: JadwalTabProps) 
     <div className="flex flex-col gap-4 animate-in fade-in duration-300">
       
       {/* --- DESKTOP HEADER (Hidden on mobile) --- */}
-      <div className="hidden md:flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-card border rounded-2xl shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-primary/10 rounded-xl">
-            {isLoading ? <Loader2 className="h-6 w-6 text-primary animate-spin" /> : <CalendarIcon className="h-6 w-6 text-primary" />}
+      <div className="hidden md:flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-card border border-border/80 rounded-2xl shadow-xs">
+        <div className="flex items-center gap-3.5">
+          <div className="p-3 bg-primary/10 rounded-xl text-primary border border-primary/20">
+            {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <CalendarIcon className="h-6 w-6 stroke-[2.25]" />}
           </div>
           <div>
-            <h2 className="text-xl font-bold capitalize">
+            <h2 className="text-lg font-extrabold capitalize text-foreground">
               {format(currentDate, "MMMM yyyy", { locale: id })}
             </h2>
-            <p className="text-sm text-muted-foreground">
-              Jadwal Piket Petugas Bulanan
+            <p className="text-xs text-muted-foreground">
+              Jadwal Piket Petugas Bulanan BPS Kabupaten Tangerang
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button variant="default" onClick={openAssignDialog} className="rounded-lg shadow-sm">
-            <CalendarCheck className="mr-2 h-4 w-4" />
-            Assign Petugas
+        <div className="flex items-center gap-2.5">
+          <Button variant="default" onClick={openAssignDialog} className="rounded-xl shadow-xs font-bold gap-2">
+            <CalendarCheck className="h-4 w-4" />
+            <span>Assign Petugas</span>
           </Button>
-          <Button variant="outline" onClick={goToToday} className="rounded-lg">
+          <Button variant="outline" onClick={goToToday} className="rounded-xl font-semibold">
             Bulan Ini
           </Button>
-          <div className="flex items-center rounded-lg border overflow-hidden shadow-sm">
-            <Button variant="ghost" size="icon" onClick={prevMonth} className="rounded-none border-r hover:bg-muted">
+          <div className="flex items-center rounded-xl border border-border/80 overflow-hidden shadow-2xs">
+            <Button variant="ghost" size="icon" onClick={prevMonth} className="h-9 w-9 rounded-none border-r border-border/60 hover:bg-muted">
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={nextMonth} className="rounded-none hover:bg-muted">
+            <Button variant="ghost" size="icon" onClick={nextMonth} className="h-9 w-9 rounded-none hover:bg-muted">
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
@@ -241,14 +241,14 @@ export function JadwalTab({ initialData, templates, pegawais }: JadwalTabProps) 
       </div>
 
       {/* --- MOBILE HEADER (Hidden on desktop) --- */}
-      <div className="flex md:hidden flex-col gap-4 p-4 bg-card border rounded-2xl shadow-sm">
+      <div className="flex md:hidden flex-col gap-4 p-4 bg-card border border-border/80 rounded-2xl shadow-xs">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <CalendarIcon className="h-5 w-5 text-primary" />
+            <div className="p-2 bg-primary/10 rounded-xl text-primary">
+              <CalendarIcon className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold">
+              <h2 className="text-base font-extrabold text-foreground">
                 {format(weekStart, "d MMM", { locale: id })} - {format(weekEnd, "d MMM yyyy", { locale: id })}
               </h2>
               <p className="text-xs text-muted-foreground">
@@ -259,14 +259,14 @@ export function JadwalTab({ initialData, templates, pegawais }: JadwalTabProps) 
         </div>
 
         <div className="flex items-center justify-between gap-2">
-          <Button variant="default" size="sm" onClick={openAssignDialog} className="flex-[1.5] rounded-lg">
+          <Button variant="default" size="sm" onClick={openAssignDialog} className="flex-[1.5] rounded-xl font-bold">
             <CalendarCheck className="mr-2 h-4 w-4" />
-            Assign Petugas
+            <span>Assign</span>
           </Button>
-          <Button variant="outline" size="sm" onClick={goToToday} className="flex-1 rounded-lg">
+          <Button variant="outline" size="sm" onClick={goToToday} className="flex-1 rounded-xl font-semibold">
             Bulan Ini
           </Button>
-          <div className="flex items-center rounded-lg border overflow-hidden shadow-sm flex-1">
+          <div className="flex items-center rounded-xl border overflow-hidden shadow-2xs flex-1">
             <Button variant="ghost" onClick={prevWeek} className="flex-1 rounded-none border-r hover:bg-muted">
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -278,13 +278,13 @@ export function JadwalTab({ initialData, templates, pegawais }: JadwalTabProps) 
       </div>
 
       {/* --- DESKTOP CALENDAR GRID (Hidden on mobile) --- */}
-      <div className="hidden md:block bg-card border rounded-2xl shadow-sm overflow-hidden relative">
+      <div className="hidden md:block bg-card border border-border/80 rounded-2xl shadow-xs overflow-hidden relative">
         {isLoading && <div className="absolute inset-0 bg-background/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
           <Loader2 className="h-8 w-8 text-primary animate-spin" />
         </div>}
-        <div className="grid grid-cols-7 border-b bg-muted/40">
+        <div className="grid grid-cols-7 border-b border-border/60 bg-muted/30">
           {shortWeekDaysLabels.map((day, idx) => (
-            <div key={day} className={cn("p-3 text-center text-sm font-semibold", 
+            <div key={day} className={cn("p-3 text-center text-xs font-extrabold uppercase tracking-wider", 
               idx >= 5 ? "text-red-500" : "text-muted-foreground"
             )}>
               {day}
@@ -297,22 +297,26 @@ export function JadwalTab({ initialData, templates, pegawais }: JadwalTabProps) 
             const schedule = getScheduleForDay(day);
             const isCurrentMonth = isSameMonth(day, monthStart);
             const isTodayDate = isToday(day);
+            const dayOfWeek = day.getDay(); // 0 = Sun, 6 = Sat
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
             return (
               <div 
                 key={day.toString()} 
                 className={cn(
-                  "border-b border-r p-2.5 flex flex-col gap-2 hover:bg-muted/30 transition-colors relative group",
-                  !isCurrentMonth && "bg-muted/10 text-muted-foreground/50",
+                  "border-b border-r border-border/60 p-2.5 flex flex-col gap-2 hover:bg-muted/30 transition-colors relative group",
+                  (!isCurrentMonth || isWeekend) && "bg-muted/20 text-muted-foreground/40",
                   dayIdx % 7 === 6 && "border-r-0",
                   dayIdx >= monthDays.length - 7 && "border-b-0"
                 )}
               >
                 <div className="flex justify-between items-start">
                   <span className={cn(
-                    "text-sm font-semibold w-8 h-8 flex items-center justify-center rounded-full transition-all",
-                    isTodayDate ? "bg-primary text-primary-foreground shadow-md scale-110" : "text-foreground group-hover:text-primary",
-                    !isCurrentMonth && !isTodayDate ? "opacity-50" : ""
+                    "text-xs font-bold w-7 h-7 flex items-center justify-center rounded-full transition-all",
+                    isTodayDate 
+                      ? "bg-primary text-primary-foreground font-extrabold shadow-md scale-105 ring-2 ring-primary/30" 
+                      : isWeekend ? "text-red-400 opacity-60" : "text-foreground group-hover:text-primary",
+                    !isCurrentMonth && !isTodayDate ? "opacity-40" : ""
                   )}>
                     {format(day, "d")}
                   </span>
@@ -321,7 +325,7 @@ export function JadwalTab({ initialData, templates, pegawais }: JadwalTabProps) 
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="h-6 w-6 absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-primary hover:text-primary-foreground"
+                      className="h-6 w-6 rounded-lg absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-primary hover:text-primary-foreground"
                       onClick={() => openEditDialog(day)}
                       title="Edit jadwal hari ini"
                     >
@@ -335,10 +339,10 @@ export function JadwalTab({ initialData, templates, pegawais }: JadwalTabProps) 
                     <div 
                       key={i} 
                       className={cn(
-                        "text-[11px] px-2 py-1.5 rounded-md font-medium truncate border shadow-sm transition-all hover:scale-[1.02]",
+                        "text-[11px] px-2 py-1.5 rounded-lg font-bold truncate border shadow-2xs transition-all hover:scale-[1.02]",
                         item.pegawai.gender === 'L' 
-                          ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800" 
-                          : "bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-900/20 dark:text-pink-400 dark:border-pink-800"
+                          ? "bg-blue-500/10 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-300 dark:border-blue-800" 
+                          : "bg-pink-500/10 text-pink-700 border-pink-200 dark:bg-pink-950/30 dark:text-pink-300 dark:border-pink-800"
                       )}
                       title={item.pegawai.name}
                     >
@@ -346,7 +350,7 @@ export function JadwalTab({ initialData, templates, pegawais }: JadwalTabProps) 
                     </div>
                   ))}
                   {schedule.length > 3 && (
-                    <div className="text-[10px] text-muted-foreground font-medium px-1">
+                    <div className="text-[10px] text-muted-foreground font-bold px-1">
                       +{schedule.length - 3} lainnya
                     </div>
                   )}

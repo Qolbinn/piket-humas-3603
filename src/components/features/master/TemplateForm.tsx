@@ -177,28 +177,28 @@ export function TemplateForm({ templates }: TemplateFormProps) {
                   </div>
 
                   {/* Variables section */}
-                  <div className="space-y-3 p-4 border rounded-xl bg-muted/10">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                      <Info className="h-4 w-4" />
-                      <span>Variabel Tersedia (Klik untuk menyisipkan):</span>
+                  <div className="space-y-3 p-4.5 border border-primary/25 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background shadow-2xs">
+                    <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-primary">
+                      <Info className="h-4 w-4 text-primary" />
+                      <span>Variabel Otomatis (Klik untuk menyisipkan ke pesan):</span>
                     </div>
-                    <div className="flex flex-wrap gap-2.5">
+                    <div className="flex flex-wrap gap-2">
                       <TooltipProvider delayDuration={200}>
                         {type.variables.map(v => (
                           <Tooltip key={v.id}>
                             <TooltipTrigger asChild>
                               <Button
                                 type="button"
-                                variant="secondary"
+                                variant="outline"
                                 size="sm"
                                 onClick={() => insertVariable(v.id)}
-                                className="text-xs h-8 hover:bg-primary/10 hover:text-primary transition-colors border shadow-sm"
+                                className="text-xs font-mono font-bold h-8.5 rounded-xl bg-background/80 hover:bg-primary text-foreground hover:text-primary-foreground border-primary/30 shadow-2xs transition-all gap-1.5"
                                 disabled={previewMode}
                               >
-                                {v.id}
+                                <span>{v.id}</span>
                               </Button>
                             </TooltipTrigger>
-                            <TooltipContent side="top" className="text-xs">
+                            <TooltipContent side="top" className="text-xs font-semibold rounded-lg">
                               {v.label}
                             </TooltipContent>
                           </Tooltip>
@@ -223,18 +223,24 @@ export function TemplateForm({ templates }: TemplateFormProps) {
                         variant={previewMode ? "secondary" : "outline"}
                         size="sm"
                         onClick={() => togglePreview(type.id)}
-                        className="h-9 rounded-xl shadow-sm px-4"
+                        className="h-9 rounded-xl shadow-xs px-4 font-bold gap-2"
                       >
-                        <Eye className="w-4 h-4 mr-2" />
-                        {previewMode ? 'Tutup Preview' : 'Preview WA'}
+                        <Eye className="w-4 h-4" />
+                        <span>{previewMode ? 'Tutup Preview' : 'Preview WhatsApp'}</span>
                       </Button>
                     </div>
 
                     {previewMode ? (
-                      <div
-                        className="rounded-xl border min-h-[350px] h-full overflow-y-auto p-5 text-sm bg-muted/10 leading-relaxed shadow-inner"
-                        dangerouslySetInnerHTML={{ __html: parseWaMarkdown(contents[type.id]) || '<span class="text-muted-foreground italic">Belum ada konten...</span>' }}
-                      />
+                      <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5 min-h-[350px] h-full overflow-y-auto text-sm leading-relaxed shadow-xs relative">
+                        <div className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-3 pb-2 border-b border-emerald-500/20 flex items-center gap-2">
+                          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                          Simulasi Tampilan Pesan Bot WhatsApp
+                        </div>
+                        <div 
+                          className="prose prose-sm dark:prose-invert max-w-none text-foreground font-sans"
+                          dangerouslySetInnerHTML={{ __html: parseWaMarkdown(contents[type.id]) || '<span class="text-muted-foreground italic">Belum ada konten template...</span>' }}
+                        />
+                      </div>
                     ) : (
                       <Textarea
                         ref={(el) => {
@@ -243,7 +249,7 @@ export function TemplateForm({ templates }: TemplateFormProps) {
                         value={contents[type.id]}
                         onChange={(e) => handleChange(type.id, e.target.value)}
                         placeholder={`Ketik pesan ${type.label} di sini...`}
-                        className="min-h-[350px] resize-y font-mono text-sm leading-relaxed rounded-xl focus-visible:ring-primary/30 p-5 shadow-sm"
+                        className="min-h-[350px] resize-y font-mono text-sm leading-relaxed rounded-2xl focus-visible:ring-primary/30 p-5 shadow-xs border border-border/80"
                       />
                     )}
 

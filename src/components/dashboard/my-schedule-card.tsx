@@ -57,20 +57,20 @@ export function MyScheduleCard() {
   };
 
   return (
-    <Card className="h-[400px] flex flex-col overflow-hidden shadow-sm">
-      <CardHeader className="bg-muted/30">
-        <div className="flex items-center gap-2 mb-2">
-          <CalendarIcon className="h-5 w-5 text-primary" />
-          <CardTitle className="text-lg">Jadwal Piket Saya</CardTitle>
+    <Card className="h-[400px] flex flex-col overflow-hidden shadow-xs rounded-2xl border border-border/80">
+      <CardHeader className="bg-muted/30 border-b border-border/60 pb-3">
+        <div className="flex items-center gap-2 mb-1.5">
+          <CalendarIcon className="h-4 w-4 text-primary" />
+          <CardTitle className="text-base font-bold">Jadwal Piket Saya</CardTitle>
         </div>
-        <div className="flex items-center justify-between border rounded-md bg-background px-1 py-0.5">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={prevMonth}>
+        <div className="flex items-center justify-between border rounded-xl bg-background px-1 py-0.5 shadow-2xs">
+          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={prevMonth}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm font-medium">
+          <span className="text-xs font-bold text-foreground">
             {format(currentDate, "MMMM yyyy", { locale: id })}
           </span>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={nextMonth}>
+          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={nextMonth}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -82,7 +82,7 @@ export function MyScheduleCard() {
           </div>
         )}
         <ScrollArea className="h-full">
-          <div className="p-4 flex flex-col gap-3">
+          <div className="p-3.5 flex flex-col gap-2.5">
             {mySchedule.length > 0 ? (
               [...mySchedule]
                 .sort((a, b) => {
@@ -104,29 +104,29 @@ export function MyScheduleCard() {
                   return (
                     <div
                       key={idx}
-                      className={`flex flex-col gap-1.5 p-3 rounded-lg border transition-colors shadow-sm ${isPast ? "bg-muted/30 opacity-60 grayscale-[0.3] border-dashed" : "bg-card hover:bg-muted/50"
+                      className={`flex flex-col gap-1.5 p-3 rounded-xl border transition-all ${isPast ? "bg-muted/30 opacity-60 grayscale-[0.3] border-dashed" : "bg-card hover:bg-muted/40 border-border/80 shadow-2xs"
                         }`}
                     >
-                      <span className="text-sm font-semibold text-foreground">
+                      <span className="text-xs font-bold text-foreground">
                         {format(new Date(item.tanggal), "EEEE, d MMMM yyyy", { locale: id })}
                       </span>
-                      <div className="flex justify-between items-center mt-1">
+                      <div className="flex justify-between items-center mt-0.5">
                         <div>
                           {differenceInCalendarDays(new Date(item.tanggal), new Date()) <= 0 && (
                             <div className="flex items-center gap-1.5">
                               {item.is_hadir ? (
-                                <span className="flex items-center text-xs text-green-600 bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-full font-medium border border-green-200 dark:border-green-800">
-                                  <CheckCircle2 className="w-3 h-3 mr-1" /> Absen
+                                <span className="flex items-center text-[10px] text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full font-bold border border-emerald-200 dark:border-emerald-800">
+                                  <CheckCircle2 className="w-3 h-3 mr-1" /> Hadir
                                 </span>
                               ) : (
-                                <span className="flex items-center text-xs text-red-600 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-full font-medium border border-red-200 dark:border-red-800">
+                                <span className="flex items-center text-[10px] text-red-700 bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded-full font-bold border border-red-200 dark:border-red-800">
                                   <XCircle className="w-3 h-3 mr-1" /> Absen
                                 </span>
                               )}
                             </div>
                           )}
                         </div>
-                        <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${className}`}>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${className}`}>
                           {text}
                         </span>
                       </div>
@@ -135,7 +135,7 @@ export function MyScheduleCard() {
                 })
             ) : (
               !isLoading && (
-                <div className="text-center text-sm text-muted-foreground italic py-10 px-4">
+                <div className="text-center text-xs text-muted-foreground italic py-10 px-4">
                   Tidak ada jadwal piket di bulan ini.
                 </div>
               )

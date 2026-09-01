@@ -7,8 +7,9 @@ import { Pegawai } from '@/lib/types/database'
 interface PegawaiTableClientProps {
   data: Pegawai[]
   isAdmin: boolean
+  currentPegawaiId?: string
 }
 
-export default function PegawaiTableClient({ data, isAdmin }: PegawaiTableClientProps) {
-  return <DataTable columns={getColumns(isAdmin)} data={data} />
+export default function PegawaiTableClient({ data, isAdmin, currentPegawaiId }: PegawaiTableClientProps) {
+  return <DataTable columns={getColumns(isAdmin, currentPegawaiId)} data={data} />
 }

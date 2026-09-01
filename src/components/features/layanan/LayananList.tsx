@@ -2,10 +2,11 @@
 
 import * as React from 'react'
 import { type KategoriLayanan } from '@/lib/types/database'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { format } from 'date-fns'
 import { id } from 'date-fns/locale'
+import { Tag } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import EditLayananDialog from './EditLayananDialog'
 import DeleteLayananButton from './DeleteLayananButton'
 
@@ -16,49 +17,68 @@ interface LayananListProps {
 export default function LayananList({ data }: LayananListProps) {
   if (data.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-center border rounded-2xl border-dashed bg-muted/20">
-        <p className="text-lg font-medium text-foreground">Belum ada kategori layanan.</p>
-        <p className="text-sm text-muted-foreground mt-1">Silakan tambah kategori baru untuk mulai mengelola layanan.</p>
+      <div className="flex flex-col items-center justify-center p-12 text-center border border-dashed rounded-2xl bg-muted/20">
+        <p className="text-base font-bold text-foreground">Belum ada kategori layanan.</p>
+        <p className="text-xs text-muted-foreground mt-1">Silakan tambah kategori baru untuk mulai mengelola layanan.</p>
       </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
       {data.map((layanan) => (
-        <Card key={layanan.id} className="rounded-2xl shadow-sm border bg-card/50 hover:bg-card transition-all overflow-hidden flex flex-col justify-between">
-          <CardHeader className="p-5 pb-2">
-            <div className="flex items-start justify-between gap-4">
+        <Card 
+          key={layanan.id} 
+          className={cn(
+            "rounded-2xl shadow-xs border border-border/80 bg-card hover:bg-muted/10 transition-all overflow-hidden flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 relative group",
+            layanan.is_active ? "border-t-4 border-t-emerald-500" : "border-t-4 border-t-muted-foreground/40"
+          )}
+        >
+          <CardHeader className="p-5">
+            <div className="flex items-start gap-3.5">
+              <div className={cn(
+                "p-3 rounded-xl border shrink-0 transition-colors",
+                layanan.is_active 
+                  ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" 
+                  : "bg-muted text-muted-foreground border-border/60"
+              )}>
+                <Tag className="h-5 w-5 stroke-[2.25]" />
+              </div>
+
               <div className="flex-1 min-w-0">
-                <CardTitle className="text-lg font-semibold truncate flex items-center gap-2" title={layanan.nama}>
-                  <Badge variant="outline" className="text-xs bg-muted/50 rounded-lg">{layanan.kode}</Badge>
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <span className="text-xs font-mono font-extrabold bg-primary/10 text-primary px-2 py-0.5 rounded-lg border border-primary/20">
+                    #{layanan.kode}
+                  </span>
+                  
+                  {layanan.is_active ? (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                      Aktif
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-muted text-muted-foreground border">
+                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50"></span>
+                      Nonaktif
+                    </span>
+                  )}
+                </div>
+
+                <CardTitle className="text-base font-extrabold text-foreground truncate mt-2" title={layanan.nama}>
                   {layanan.nama}
                 </CardTitle>
-                <CardDescription className="mt-1.5 text-xs text-muted-foreground">
-                  Dibuat pada {format(new Date(layanan.created_at), 'dd MMM yyyy', { locale: id })}
+                
+                <CardDescription className="mt-1 text-[11px] text-muted-foreground">
+                  Dibuat {format(new Date(layanan.created_at), 'dd MMM yyyy', { locale: id })}
                 </CardDescription>
               </div>
-              <div className="flex items-center -mt-1 -mr-2">
-                <EditLayananDialog layanan={layanan} />
-                <DeleteLayananButton id={layanan.id} name={layanan.nama} />
-              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-1 pt-3 mt-3 border-t border-border/40">
+              <EditLayananDialog layanan={layanan} />
+              <DeleteLayananButton id={layanan.id} name={layanan.nama} />
             </div>
           </CardHeader>
-          <CardContent className="p-5 pt-3">
-            <div className="flex items-center gap-2 mt-2">
-              {layanan.is_active ? (
-                <Badge variant="default" className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 px-2 py-0.5 rounded-md font-medium text-xs">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></div>
-                  Aktif Digunakan
-                </Badge>
-              ) : (
-                <Badge variant="secondary" className="bg-muted text-muted-foreground px-2 py-0.5 rounded-md font-medium text-xs">
-                  <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 mr-1.5"></div>
-                  Nonaktif
-                </Badge>
-              )}
-            </div>
-          </CardContent>
         </Card>
       ))}
     </div>

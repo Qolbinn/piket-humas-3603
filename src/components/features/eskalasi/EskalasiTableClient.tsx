@@ -7,7 +7,7 @@ import { id as localeId } from "date-fns/locale";
 import { 
   CheckCircle2, Clock, Loader2, MessageCircle, Send, ShieldAlert, User, 
   ArrowUpDown, ArrowDown, ArrowUp, RefreshCcw, Search, SlidersHorizontal,
-  Mail, Users
+  Mail, Users, Copy, Check
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
@@ -42,6 +42,16 @@ export default function EskalasiTableClient({ data, currentUserId, kategoriList 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [copiedLid, setCopiedLid] = useState(false);
+
+  const handleCopyLid = (lid: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const cleanNum = lid.replace('@s.whatsapp.net', '');
+    navigator.clipboard.writeText(cleanNum);
+    setCopiedLid(true);
+    toast.success(`Nomor WhatsApp/LID (${cleanNum}) berhasil disalin!`);
+    setTimeout(() => setCopiedLid(false), 2000);
+  };
 
   // Filters State
   const [searchTerm, setSearchTerm] = useState(searchParams.get("query") || "");
@@ -176,11 +186,26 @@ export default function EskalasiTableClient({ data, currentUserId, kategoriList 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "OPEN":
-        return <Badge variant="destructive" className="bg-red-500 hover:bg-red-600 text-white">Open</Badge>;
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
+            <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+            OPEN
+          </span>
+        );
       case "ON_PROCESS":
-        return <Badge variant="default" className="bg-orange-500 hover:bg-orange-600 text-white">Diproses</Badge>;
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+            ON PROCESS
+          </span>
+        );
       case "RESOLVED":
-        return <Badge variant="secondary" className="bg-green-500 hover:bg-green-600 text-white">Selesai</Badge>;
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+            <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+            RESOLVED
+          </span>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -322,19 +347,30 @@ export default function EskalasiTableClient({ data, currentUserId, kategoriList 
                   )}
                   {visibleColumns.pelanggan && (
                     <TableCell>
-                      <div className="font-semibold">{item.nama_pelanggan}</div>
-                      <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
+                      <div className="font-bold text-sm text-foreground">{item.nama_pelanggan}</div>
+                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                         {getChannelIcon(item.channel)}
-                        <span className="capitalize">{item.channel.replace("_", " ")}</span>
+                        <span className="capitalize font-medium">{item.channel.replace("_", " ")}</span>
+                        {item.pelanggan_lid && (
+                          <button
+                            type="button"
+                            title="Salin nomor WhatsApp"
+                            onClick={(e) => handleCopyLid(item.pelanggan_lid!, e)}
+                            className="inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground hover:text-primary bg-muted/60 hover:bg-muted px-1.5 py-0.5 rounded transition-colors"
+                          >
+                            <span>{item.pelanggan_lid.replace('@s.whatsapp.net', '')}</span>
+                            <Copy className="h-3 w-3" />
+                          </button>
+                        )}
                       </div>
                     </TableCell>
                   )}
                   {visibleColumns.detail && (
                     <TableCell>
-                      <Badge variant="outline" className="mb-1 bg-muted/30">
+                      <Badge variant="outline" className="mb-1 bg-primary/5 text-primary border-primary/20 font-semibold text-[10px]">
                         {item.kategori_layanan?.nama || "Umum"}
                       </Badge>
-                      <div className="text-sm max-w-[450px] truncate" title={item.detail || ""}>
+                      <div className="text-xs text-foreground/90 max-w-[450px] truncate leading-relaxed" title={item.detail || ""}>
                         {item.detail || "-"}
                       </div>
                     </TableCell>
@@ -342,7 +378,7 @@ export default function EskalasiTableClient({ data, currentUserId, kategoriList 
                   {visibleColumns.petugas && (
                     <TableCell>
                       {item.pegawai ? (
-                        <span className="text-sm">{item.pegawai.name}</span>
+                        <span className="text-xs font-semibold text-foreground">{item.pegawai.name}</span>
                       ) : (
                         <span className="text-xs text-muted-foreground italic">Belum ditugaskan</span>
                       )}
@@ -365,8 +401,8 @@ export default function EskalasiTableClient({ data, currentUserId, kategoriList 
                   )}
                   {visibleColumns.feedback && (
                     <TableCell className="text-center">
-                      {item.feedback_status === 'SENT' && <CheckCircle2 className="h-4 w-4 text-green-500 mx-auto" />}
-                      {item.feedback_status === 'PENDING' && <Clock className="h-4 w-4 text-orange-500 mx-auto" />}
+                      {item.feedback_status === 'SENT' && <CheckCircle2 className="h-4 w-4 text-emerald-500 mx-auto" />}
+                      {item.feedback_status === 'PENDING' && <Clock className="h-4 w-4 text-amber-500 mx-auto" />}
                       {!item.feedback_status && <span className="text-xs text-muted-foreground">-</span>}
                     </TableCell>
                   )}
@@ -379,48 +415,51 @@ export default function EskalasiTableClient({ data, currentUserId, kategoriList 
 
       {/* Detail Panel */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent className="sm:max-w-[800px] overflow-y-auto w-[95vw] p-8">
+        <SheetContent className="sm:max-w-[700px] overflow-y-auto w-[95vw] p-6 sm:p-8 rounded-l-3xl">
           <SheetHeader className="mb-4">
-            <SheetTitle className="text-2xl flex items-center gap-2">
-              <ShieldAlert className="h-6 w-6 text-primary" /> Detail Eskalasi
+            <SheetTitle className="text-2xl font-extrabold flex items-center gap-2 text-foreground">
+              <ShieldAlert className="h-6 w-6 text-primary" /> Detail Eskalasi Pelanggan
             </SheetTitle>
+            <SheetDescription className="text-xs text-muted-foreground">
+              Kelola detail laporan, status penanganan, dan pengiriman survei kepuasan.
+            </SheetDescription>
           </SheetHeader>
 
           {selectedEskalasi && (
             <div className="space-y-6">
               {/* Status Banner */}
-              <div className="flex items-center justify-between p-4 bg-muted/30 rounded-xl border">
+              <div className="flex items-center justify-between p-4 bg-muted/40 rounded-2xl border border-border/80">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-background rounded-full border shadow-sm">
+                  <div className="p-2.5 bg-background rounded-xl border shadow-2xs">
                     {selectedEskalasi.status === 'OPEN' && <Clock className="h-5 w-5 text-red-500" />}
-                    {selectedEskalasi.status === 'ON_PROCESS' && <Loader2 className="h-5 w-5 text-blue-500 animate-spin-slow" />}
-                    {selectedEskalasi.status === 'RESOLVED' && <CheckCircle2 className="h-5 w-5 text-green-500" />}
+                    {selectedEskalasi.status === 'ON_PROCESS' && <Loader2 className="h-5 w-5 text-amber-500 animate-spin" />}
+                    {selectedEskalasi.status === 'RESOLVED' && <CheckCircle2 className="h-5 w-5 text-emerald-500" />}
                   </div>
                   <div>
-                    <p className="text-sm font-medium">Status Saat Ini</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Status Saat Ini</p>
                     <div className="mt-1">{getStatusBadge(selectedEskalasi.status)}</div>
                   </div>
                 </div>
               </div>
 
               {/* Editable Form */}
-              <form onSubmit={handleUpdateDetail} className="space-y-6">
-                <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+              <form onSubmit={handleUpdateDetail} className="space-y-5">
+                <div className="space-y-3">
+                  <h3 className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
                     <User className="h-4 w-4" /> Informasi Pelanggan
                   </h3>
-                  <div className="space-y-3 p-4 border rounded-xl bg-card">
+                  <div className="space-y-3 p-4 border border-border/80 rounded-2xl bg-card">
                     <div className="space-y-1">
                       <Label className="text-xs text-muted-foreground">Nama Pelanggan</Label>
-                      <Input name="nama_pelanggan" defaultValue={selectedEskalasi.nama_pelanggan} required />
+                      <Input name="nama_pelanggan" defaultValue={selectedEskalasi.nama_pelanggan} className="rounded-xl font-semibold" required />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-xs text-muted-foreground">Channel</Label>
                       <Select name="channel" defaultValue={selectedEskalasi.channel}>
-                        <SelectTrigger>
+                        <SelectTrigger className="rounded-xl">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="rounded-xl">
                           <SelectItem value="whatsapp">WhatsApp</SelectItem>
                           <SelectItem value="email">Email</SelectItem>
                           <SelectItem value="kunjungan_langsung">Kunjungan Langsung</SelectItem>
@@ -429,8 +468,21 @@ export default function EskalasiTableClient({ data, currentUserId, kategoriList 
                     </div>
                     {selectedEskalasi.channel === 'whatsapp' && (
                       <div className="space-y-1">
-                        <Label className="text-xs text-muted-foreground">LID WhatsApp</Label>
-                        <Input value={selectedEskalasi.pelanggan_lid?.replace('@s.whatsapp.net', '') || ""} disabled />
+                        <Label className="text-xs text-muted-foreground">Nomor WhatsApp / LID</Label>
+                        <div className="flex gap-2">
+                          <Input value={selectedEskalasi.pelanggan_lid?.replace('@s.whatsapp.net', '') || ""} className="rounded-xl font-mono text-xs" disabled />
+                          {selectedEskalasi.pelanggan_lid && (
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              className="rounded-xl gap-1.5 shrink-0 text-xs font-bold"
+                              onClick={(e) => handleCopyLid(selectedEskalasi.pelanggan_lid!, e)}
+                            >
+                              {copiedLid ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                              <span>{copiedLid ? "Tersalin" : "Salin No"}</span>
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>

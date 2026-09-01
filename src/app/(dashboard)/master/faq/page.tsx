@@ -33,38 +33,38 @@ export default async function FaqPage() {
 
       {/* Stats Bar */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="rounded-3xl border-none shadow-md bg-gradient-to-br from-indigo-500 to-indigo-600 text-white">
-          <CardContent className="p-6 flex items-center justify-between">
+        <Card className="rounded-2xl border border-border/80 shadow-xs hover:shadow-md transition-all bg-gradient-to-br from-indigo-500/10 via-background to-background relative overflow-hidden">
+          <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-indigo-100 font-medium">Total Menu (Folder)</p>
-              <h3 className="text-4xl font-bold mt-2">{totalMenus}</h3>
+              <p className="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300">Total Menu (Folder)</p>
+              <h3 className="text-3xl font-extrabold text-foreground mt-1">{totalMenus}</h3>
             </div>
-            <div className="p-4 bg-white/20 rounded-2xl">
-              <FolderTree className="h-8 w-8 text-white" />
+            <div className="p-3 bg-indigo-500/10 text-indigo-600 rounded-xl border border-indigo-500/20">
+              <FolderTree className="h-6 w-6 stroke-[2.25]" />
             </div>
           </CardContent>
         </Card>
         
-        <Card className="rounded-3xl border-none shadow-md bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-          <CardContent className="p-6 flex items-center justify-between">
+        <Card className="rounded-2xl border border-border/80 shadow-xs hover:shadow-md transition-all bg-gradient-to-br from-blue-500/10 via-background to-background relative overflow-hidden">
+          <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-blue-100 font-medium">Total Jawaban Final</p>
-              <h3 className="text-4xl font-bold mt-2">{totalAnswers}</h3>
+              <p className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300">Total Jawaban Final</p>
+              <h3 className="text-3xl font-extrabold text-foreground mt-1">{totalAnswers}</h3>
             </div>
-            <div className="p-4 bg-white/20 rounded-2xl">
-              <MessageSquareText className="h-8 w-8 text-white" />
+            <div className="p-3 bg-blue-500/10 text-blue-600 rounded-xl border border-blue-500/20">
+              <MessageSquareText className="h-6 w-6 stroke-[2.25]" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="rounded-3xl border-none shadow-md bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
-          <CardContent className="p-6 flex items-center justify-between">
+        <Card className="rounded-2xl border border-border/80 shadow-xs hover:shadow-md transition-all bg-gradient-to-br from-emerald-500/10 via-background to-background relative overflow-hidden">
+          <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-emerald-100 font-medium">Status Aktif</p>
-              <h3 className="text-4xl font-bold mt-2">{totalActive} / {faqs.length}</h3>
+              <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">Status Aktif</p>
+              <h3 className="text-3xl font-extrabold text-foreground mt-1">{totalActive} / {faqs.length}</h3>
             </div>
-            <div className="p-4 bg-white/20 rounded-2xl">
-              <Layers className="h-8 w-8 text-white" />
+            <div className="p-3 bg-emerald-500/10 text-emerald-600 rounded-xl border border-emerald-500/20">
+              <Layers className="h-6 w-6 stroke-[2.25]" />
             </div>
           </CardContent>
         </Card>

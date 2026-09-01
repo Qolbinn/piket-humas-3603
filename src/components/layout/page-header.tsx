@@ -16,19 +16,19 @@ export default function PageHeader({
   action 
 }: PageHeaderProps) {
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2 text-muted-foreground text-sm">
-          <Icon className="h-4 w-4" />
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 pb-2 border-b border-border/40">
+      <div className="flex flex-col gap-1.5">
+        <div className="inline-flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-lg w-fit">
+          <Icon className="h-3.5 w-3.5" />
           <span>{breadcrumbText}</span>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-primary">{title}</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">{title}</h1>
+        <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
           {description}
         </p>
       </div>
       {action && (
-        <div className="shrink-0">
+        <div className="shrink-0 pt-2 sm:pt-0">
           {action}
         </div>
       )}

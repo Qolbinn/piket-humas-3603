@@ -107,34 +107,42 @@ export default async function EskalasiPage({
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+        <Card className="border border-border/80 shadow-xs hover:shadow-md transition-all bg-gradient-to-br from-primary/10 via-background to-background relative overflow-hidden rounded-2xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Eskalasi</CardTitle>
-            <Inbox className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Total Eskalasi</CardTitle>
+            <div className="p-2.5 bg-primary/10 text-primary rounded-xl border border-primary/20">
+              <Inbox className="h-4 w-4 stroke-[2.25]" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary.total}</div>
-            <p className="text-xs text-muted-foreground">Pada rentang waktu terpilih</p>
+            <div className="text-3xl font-extrabold text-foreground">{summary.total}</div>
+            <p className="text-xs text-muted-foreground mt-1">Pada rentang waktu terpilih</p>
           </CardContent>
         </Card>
-        <Card>
+        
+        <Card className="border border-border/80 shadow-xs hover:shadow-md transition-all bg-gradient-to-br from-amber-500/10 via-background to-background relative overflow-hidden rounded-2xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-orange-600">Belum Selesai</CardTitle>
-            <Clock className="h-4 w-4 text-orange-600" />
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">Belum Selesai</CardTitle>
+            <div className="p-2.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl border border-amber-500/20">
+              <Clock className="h-4 w-4 stroke-[2.25]" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary.unresolved}</div>
-            <p className="text-xs text-muted-foreground">Status OPEN & ON PROCESS</p>
+            <div className="text-3xl font-extrabold text-foreground">{summary.unresolved}</div>
+            <p className="text-xs text-muted-foreground mt-1">Status OPEN & ON PROCESS</p>
           </CardContent>
         </Card>
-        <Card>
+
+        <Card className="border border-border/80 shadow-xs hover:shadow-md transition-all bg-gradient-to-br from-emerald-500/10 via-background to-background relative overflow-hidden rounded-2xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-green-600">Telah Selesai</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Telah Selesai</CardTitle>
+            <div className="p-2.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20">
+              <CheckCircle2 className="h-4 w-4 stroke-[2.25]" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary.resolved}</div>
-            <p className="text-xs text-muted-foreground">Status RESOLVED</p>
+            <div className="text-3xl font-extrabold text-foreground">{summary.resolved}</div>
+            <p className="text-xs text-muted-foreground mt-1">Status RESOLVED</p>
           </CardContent>
         </Card>
       </div>
