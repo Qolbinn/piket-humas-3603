@@ -67,7 +67,6 @@ const getMenuItems = (role: string): MenuItem[] => {
   return items;
 };
 
-import { DashboardSidebarProps } from "@/lib/types"; // or standard props
 import { LogoutConfirmDialog } from "@/components/layout/LogoutConfirmDialog";
 
 export function DashboardSidebar({ userRole }: { userRole: string }) {

@@ -31,11 +31,10 @@ export const getColumns = (isAdmin: boolean, currentPegawaiId?: string): ColumnD
 
         return (
           <div className="flex items-center gap-3 py-1">
-            <div className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-extrabold shrink-0 border ${
-              gender === 'L'
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-extrabold shrink-0 border ${gender === 'L'
                 ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-200'
                 : 'bg-pink-500/10 text-pink-700 dark:text-pink-300 border-pink-200'
-            }`}>
+              }`}>
               {name ? name.charAt(0).toUpperCase() : <User className="h-4 w-4" />}
             </div>
             <div className="flex flex-col">
@@ -106,11 +105,10 @@ export const getColumns = (isAdmin: boolean, currentPegawaiId?: string): ColumnD
 
         return (
           <div className="flex justify-center">
-            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-extrabold border ${
-              isMale
+            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-extrabold border ${isMale
                 ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20'
                 : 'bg-pink-500/10 text-pink-700 dark:text-pink-300 border-pink-500/20'
-            }`}>
+              }`}>
               <span className={`w-1.5 h-1.5 rounded-full ${isMale ? 'bg-blue-500' : 'bg-pink-500'}`} />
               {isMale ? 'L' : 'P'}
             </span>
@@ -127,16 +125,14 @@ export const getColumns = (isAdmin: boolean, currentPegawaiId?: string): ColumnD
         const isPimpinan = role === 'pimpinan'
 
         return (
-          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold border ${
-            isAdminRole
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold border ${isAdminRole
               ? 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/20'
               : isPimpinan
-              ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20'
-              : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20'
-          }`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${
-              isAdminRole ? 'bg-sky-500' : isPimpinan ? 'bg-amber-500' : 'bg-emerald-500'
-            }`} />
+                ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20'
+                : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20'
+            }`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${isAdminRole ? 'bg-sky-500' : isPimpinan ? 'bg-amber-500' : 'bg-emerald-500'
+              }`} />
             {isAdminRole ? 'Admin' : isPimpinan ? 'Pimpinan' : 'Petugas'}
           </span>
         )

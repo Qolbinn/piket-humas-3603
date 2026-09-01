@@ -10,7 +10,7 @@ import {
 
 export function WhatsAppFab() {
   const [showNotificationBadge, setShowNotificationBadge] = useState(true);
-  const waNumber = process.env.NEXT_PUBLIC_WA_NUMBER || "6281234567890";
+  const waNumber = process.env.NEXT_PUBLIC_WA_NUMBER || "6285117193603";
   const waUrl = `https://wa.me/${waNumber}?text=Halo%20BPS%20Kabupaten%20Tangerang%20SIPASTI%20bisa%20bantu%20informasi%3F`;
 
   return (
@@ -18,8 +18,8 @@ export function WhatsAppFab() {
       {/* Floating Mini Notification Banner */}
       {showNotificationBadge && (
         <div className="relative bg-white dark:bg-slate-900 border border-emerald-500/30 text-slate-800 dark:text-slate-100 p-3 rounded-2xl shadow-xl max-w-[260px] animate-in fade-in slide-in-from-bottom-4 duration-300">
-          <button 
-            onClick={() => setShowNotificationBadge(false)} 
+          <button
+            onClick={() => setShowNotificationBadge(false)}
             className="absolute -top-2 -left-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-600 dark:text-slate-300 p-1 rounded-full text-xs transition-colors shadow-xs"
             aria-label="Tutup notifikasi"
           >
@@ -49,7 +49,7 @@ export function WhatsAppFab() {
           >
             {/* Ripple Pulse Effect */}
             <span className="absolute -inset-1 rounded-full bg-[#25D366] opacity-40 animate-ping pointer-events-none"></span>
-            
+
             <MessageCircle className="h-7 w-7 sm:h-8 sm:w-8 fill-white stroke-none transition-transform group-hover:rotate-12 duration-300" />
           </a>
         </TooltipTrigger>
